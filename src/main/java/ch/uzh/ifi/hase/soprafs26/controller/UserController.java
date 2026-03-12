@@ -56,7 +56,7 @@ public class UserController {
 		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 	}
 
-	@GetMapping("/users")
+	@GetMapping("/users/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public UserGetDTO getUserById(@PathVariable("id") Long id) {
