@@ -38,6 +38,11 @@ public class UserService {
 		return this.userRepository.findAll();
 	}
 
+	public User getUser(Long id) {
+		return userRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	}
+
 	public User createUser(User newUser) {
 		newUser.setToken(UUID.randomUUID().toString());
 		newUser.setStatus(UserStatus.OFFLINE);
@@ -75,4 +80,6 @@ public class UserService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
 		}
 	}
+
+
 }
