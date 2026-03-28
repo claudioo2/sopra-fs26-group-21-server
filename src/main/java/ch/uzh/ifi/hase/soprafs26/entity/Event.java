@@ -2,8 +2,6 @@ package ch.uzh.ifi.hase.soprafs26.entity;
 
 import jakarta.persistence.*;
 
-import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
-
 import java.io.Serializable;
 
 import java.time.LocalDateTime;
@@ -52,7 +50,7 @@ public class Event implements Serializable {
     private Double latitude;
 
     @Column(nullable = false)
-    private UserStatus isPrivate;
+    private Boolean isPrivate;
 
     @Column(nullable = false)
     private User creator;
@@ -122,11 +120,11 @@ public class Event implements Serializable {
         this.latitude = latitude;
     }
 
-    public UserStatus getIsPrivate() {
+    public Boolean getIsPrivate() {
         return isPrivate;
     }
 
-    public void setIsPrivate(UserStatus isPrivate) {
+    public void setIsPrivate(Boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 
