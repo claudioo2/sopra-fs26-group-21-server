@@ -11,9 +11,9 @@ public class EventGetDTO {
     private Double latitude;
     private Double longitude;
     private Boolean isPrivate;
-    private String inviteCode;
-    private String category;
-    private Boolean status;
+    // private String inviteCode;
+    // private String category;
+    // private Boolean status;
     private Long creatorId;
     private Integer participantCount;
 
@@ -81,29 +81,29 @@ public class EventGetDTO {
         this.isPrivate = isPrivate;
     }
 
-    public String getInviteCode() {
-        return inviteCode;
-    }
+    //public String getInviteCode() {
+    //     return inviteCode;
+    // }
 
-    public void setInviteCode(String inviteCode) {
-        this.inviteCode = inviteCode;
-    }
+    // public void setInviteCode(String inviteCode) {
+    //     this.inviteCode = inviteCode;
+    // }
 
-    public String getCategory() {
-        return category;
-    }
+    // public String getCategory() {
+    //     return category;
+    // }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    // public void setCategory(String category) {
+    //     this.category = category;
+    // }
 
-    public Boolean getStatus() {
-        return status;
-    }
+    // public Boolean getStatus() {
+    //     return status;
+    // }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
+    // public void setStatus(Boolean status) {
+    //     this.status = status;
+    // }
 
     public Long getCreatorId() {
         return creatorId;
