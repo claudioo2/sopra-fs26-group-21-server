@@ -1,14 +1,11 @@
 package ch.uzh.ifi.hase.soprafs26.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
-import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 
 /**
  * DTOMapper
@@ -54,9 +51,19 @@ public interface DTOMapper {
 	@Mapping(source = "latitude", target = "latitude")
 	@Mapping(source = "longitude", target = "longitude")
 	@Mapping(source = "isPrivate", target = "isPrivate")
-	//@Mapping(source = "creatorId", target = "creatorId")
-	//@Mapping(source = "participantCount", target = "participantCount")
-	@Mapping(target = "creatorId", ignore = true)
-	@Mapping(target = "participantCount", ignore = true)
+    @Mapping(target = "creatorId", ignore = true)
+    @Mapping(target = "participantCount", ignore = true)
 	EventGetDTO convertEntityToEventGetDTO(Event event);
+
+
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "description", target = "description")
+    @Mapping(source = "startTime", target = "startTime")
+    @Mapping(source = "endTime", target = "endTime")
+    @Mapping(source = "latitude", target = "latitude")
+    @Mapping(source = "longitude", target = "longitude")
+    @Mapping(source = "isPrivate", target = "isPrivate")
+    @Mapping(target = "creator", ignore = true)
+    @Mapping(target = "participants", ignore = true)
+    Event convertEventGetDTOtoEntity(EventPostDTO eventPostDTO);
 }
