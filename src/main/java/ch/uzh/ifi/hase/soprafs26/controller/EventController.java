@@ -7,6 +7,10 @@ import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
     private final EventService eventService;
 
-    EventController(EventService eventService) {
+    private final UserService userService;
+
+    EventController(EventService eventService, UserService userService) {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -31,5 +38,25 @@ public class EventController {
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(newEvent);
     }
 
+    @GetMapping
+	@ResponseStatus(HttpStatus.OK)
+	public List<EventGetDTO> getRadiusEvents(
+        @RequestHeader("Authorization") String authHeader, 
+        @RequestParam double latitude, 
+        @RequestParam double longitude, 
+        @RequestParam double radius) {
+		String token = authHeader.replace("Bearer ", "");
+		userService.validateToken(token);
+		
+        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius);
+        List<EventGetDTO> eventGetDTOs = new ArrayList<>();
+
+        for (Event event : events) {
+			eventGetDTOs.add(DTOMapper.INSTANCE.convertEntityToEventGetDTO(event));
+		}
+
+		return eventGetDTOs;
+
+	}
 
 }
