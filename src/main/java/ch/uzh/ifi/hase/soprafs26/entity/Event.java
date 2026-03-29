@@ -52,10 +52,12 @@ public class Event implements Serializable {
     @Column(nullable = false)
     private Boolean isPrivate;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    @Column(nullable = false)
+    @ManyToMany
+    @JoinTable(name = "event_participants")
     private List<User> participants;
 
     /*
