@@ -19,6 +19,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+
 
 @Service
 @Transactional
@@ -39,6 +41,18 @@ public class EventService {
         if (userFromToken == null){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
         }
+            List<User> participants = new ArrayList<>();
+            // add creator to participants list
+            participants.add(userFromToken);
+
+            // get the participants that are already sent in the request
+            List<User> existingParticipants = newEvent.getParticipants();
+            if (existingParticipants != null && !existingParticipants.isEmpty()){
+                participants.addAll(existingParticipants);
+            }
+
+            // set participants to be all the participants including the creator
+            newEvent.setParticipants(participants);
         newEvent.setCreator(userFromToken);
         return eventRepository.save(newEvent);
     } 
