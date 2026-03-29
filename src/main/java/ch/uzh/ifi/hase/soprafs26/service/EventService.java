@@ -1,44 +1,82 @@
+package ch.uzh.ifi.hase.soprafs26.service;
+import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.entity.User;
+import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
+//import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
-    package ch.uzh.ifi.hase.soprafs26.service;
+import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 
-    import ch.uzh.ifi.hase.soprafs26.entity.Event;
-    import ch.uzh.ifi.hase.soprafs26.entity.User;
-    import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
-    import org.slf4j.LoggerFactory;
-    import org.springframework.http.HttpStatus;
-    import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
 
-    import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
-
-    import org.slf4j.Logger;
-
-
-    //import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
-    import jakarta.transaction.Transactional;
-    import org.springframework.beans.factory.annotation.Qualifier;
-    import org.springframework.web.server.ResponseStatusException;
+//import org.slf4j.Logger;
 
 
-    @Service
-    @Transactional
-    public class EventService {
-        private final Logger log = LoggerFactory.getLogger(EventService.class);
-
-        private final EventRepository eventRepository;
-        private final UserRepository userRepository;
-
-        public EventService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository) {
-            this.eventRepository = eventRepository;
-            this.userRepository = userRepository;
-        }
+//import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.server.ResponseStatusException;
 
 
-        public Event createEvent(Event newEvent, String token) {
-            User userFromToken = userRepository.findByToken(token);
-            if (userFromToken == null){
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
-            }
-            newEvent.setCreator(userFromToken);
-            return eventRepository.save(newEvent);
-        }
+@Service
+@Transactional
+public class EventService {
+    //private final Logger log = LoggerFactory.getLogger(EventService.class);
+
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+
+    public EventService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository) {
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
     }
+
+
+    public Event createEvent(Event newEvent, String token) {
+        User userFromToken = userRepository.findByToken(token);
+        if (userFromToken == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
+        }
+        newEvent.setCreator(userFromToken);
+        return eventRepository.save(newEvent);
+    } 
+
+    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm) {
+        List<Event> allEvents = eventRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+
+
+        // filter all events that are in the radius
+        return allEvents.stream()
+        .filter(event -> {
+            double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
+            return distance <= radiusKm;
+        })
+        .filter(event -> event.getEndTime().isAfter(now))
+        .toList();
+    }
+
+
+
+    /// helper functions ///
+    
+    // Haversine Formula to calculate distance between two points on the Earth (needed in getEventsInRadius)
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS = 6371;
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c;
+    }
+
+
+}
