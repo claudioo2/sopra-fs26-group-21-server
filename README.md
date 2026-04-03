@@ -1,7 +1,7 @@
 # SoPra FS26 – Group 21 · Backend
 
 Spring Boot 4 / Java 17 REST API for the SoPra FS26 Group 21 project.
-Deployed on **Google Cloud App Engine** · Serves the frontend on port `8080`.
+Deployed on **Google Cloud App Engine** · Exposes the REST API on port `8080`. The frontend (Next.js) runs separately on port `3000`.
 
 ---
 
