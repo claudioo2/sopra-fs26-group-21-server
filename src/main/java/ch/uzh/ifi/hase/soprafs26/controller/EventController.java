@@ -11,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs26.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,7 @@ public class EventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public EventGetDTO createEvent(@RequestHeader("Authorization") String token, @RequestBody EventPostDTO eventPostDTO){
+    public EventGetDTO createEvent(@RequestHeader("Authorization") String token, @Valid @RequestBody EventPostDTO eventPostDTO){
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }

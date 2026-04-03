@@ -1,14 +1,31 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class EventPostDTO {
+    @NotBlank(message = "Title is required")
+    @Size(max = 255, message = "Title must be at most 255 characters")
     private String title;
+
+    @Size(max = 1000, message = "Description must be at most 1000 characters")
     private String description;
+
+    @NotNull(message = "Start time is required")
     private LocalDateTime startTime;
+
+    @NotNull(message = "End time is required")
     private LocalDateTime endTime;
+
+    @NotNull(message = "Longitude is required")
     private Double longitude;
+
+    @NotNull(message = "Latitude is required")
     private Double latitude;
+
+    @NotNull(message = "Privacy setting is required")
     private Boolean isPrivate;
 
 

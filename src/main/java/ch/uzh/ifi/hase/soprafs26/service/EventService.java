@@ -41,6 +41,10 @@ public class EventService {
         if (userFromToken == null){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
         }
+        if (newEvent.getEndTime() != null && newEvent.getStartTime() != null
+                && !newEvent.getEndTime().isAfter(newEvent.getStartTime())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time must be after start time");
+        }
             List<User> participants = new ArrayList<>();
             // add creator to participants list
             participants.add(userFromToken);
@@ -69,6 +73,7 @@ public class EventService {
             return distance <= radiusKm;
         })
         .filter(event -> event.getEndTime().isAfter(now))
+        .filter(event -> !event.getIsPrivate())
         .toList();
     }
 
