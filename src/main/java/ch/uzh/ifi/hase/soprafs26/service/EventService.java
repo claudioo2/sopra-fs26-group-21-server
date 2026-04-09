@@ -58,6 +58,13 @@ public class EventService {
             // set participants to be all the participants including the creator
             newEvent.setParticipants(participants);
         newEvent.setCreator(userFromToken);
+
+        String inviteCode;
+        do {
+            inviteCode = generateInviteCode();
+        } while (eventRepository.findByInviteCode(inviteCode) != null); // ensure invite code is unique
+        newEvent.setInviteCode(inviteCode);
+        
         return eventRepository.save(newEvent);
     } 
 
@@ -103,6 +110,19 @@ public class EventService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return EARTH_RADIUS * c;
+    }
+
+    // helper function to generate random invite code for events (used in createEvent)
+    private String generateInviteCode() {
+        // Generate a random alphanumeric string of length 8
+        int length = 8;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder inviteCode = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * characters.length());
+            inviteCode.append(characters.charAt(index));
+        }
+        return inviteCode.toString();
     }
 
 
