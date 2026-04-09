@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,6 +28,8 @@ public class EventPostDTO {
 
     @NotNull(message = "Privacy setting is required")
     private Boolean isPrivate;
+
+    private List<String> pictureUrls;
 
 
     public String getTitle() {
@@ -81,7 +84,15 @@ public class EventPostDTO {
         return isPrivate;
     }
 
-    public void setIstPrivate(Boolean isPrivate){
+    public void setIsPrivate(Boolean isPrivate) {
         this.isPrivate = isPrivate;
+    }
+
+    public List<String> getPictureUrls() {
+        return pictureUrls;
+    }
+
+    public void setPictureUrls(List<String> pictureUrls) {
+        this.pictureUrls = pictureUrls;
     }
 }

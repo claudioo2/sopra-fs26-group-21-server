@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class EventGetDTO {
     private Long id;
@@ -15,7 +16,9 @@ public class EventGetDTO {
     // private String category;
     // private Boolean status;
     private Long creatorId;
+    private String creatorUsername;
     private Integer participantCount;
+    private List<String> pictureUrls;
 
     public Long getId() {
         return id;
@@ -113,6 +116,14 @@ public class EventGetDTO {
         this.creatorId = creatorId;
     }
 
+    public String getCreatorUsername() {
+        return creatorUsername;
+    }
+
+    public void setCreatorUsername(String creatorUsername) {
+        this.creatorUsername = creatorUsername;
+    }
+
     public Integer getParticipantCount() {
         return participantCount;
     }
@@ -120,5 +131,12 @@ public class EventGetDTO {
     public void setParticipantCount(Integer participantCount) {
         this.participantCount = participantCount;
     }
-    
+
+    public List<String> getPictureUrls() {
+        return pictureUrls;
+    }
+
+    public void setPictureUrls(List<String> pictureUrls) {
+        this.pictureUrls = pictureUrls;
+    }
 }

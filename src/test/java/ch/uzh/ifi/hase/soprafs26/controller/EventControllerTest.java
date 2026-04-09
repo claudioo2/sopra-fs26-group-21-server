@@ -19,6 +19,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.Collections;
 import java.util.List;
 
+import ch.uzh.ifi.hase.soprafs26.entity.User;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
@@ -79,6 +83,48 @@ public class EventControllerTest {
 				.andExpect(jsonPath("$[0].description", is(event.getDescription())))
 				.andExpect(jsonPath("$[0].isPrivate", is(event.getIsPrivate())))
 				.andExpect(jsonPath("$[0].latitude", is(event.getLatitude())));
+	}
+
+	@Test
+	public void getEventById_whenExists_returnsEvent() throws Exception {
+		User creator = new User();
+		creator.setUsername("alice");
+
+		Event event = new Event();
+		event.setTitle("Test Event");
+		event.setDescription("A description");
+		event.setIsPrivate(false);
+		event.setLatitude(47.3769);
+		event.setLongitude(8.5417);
+		event.setCreator(creator);
+		event.setParticipants(List.of(creator));
+
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+		given(eventService.getEventById(1L)).willReturn(event);
+
+		MockHttpServletRequestBuilder getRequest = get("/events/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token");
+
+		mockMvc.perform(getRequest)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.title", is(event.getTitle())))
+				.andExpect(jsonPath("$.description", is(event.getDescription())))
+				.andExpect(jsonPath("$.creatorUsername", is("alice")))
+				.andExpect(jsonPath("$.participantCount", is(1)));
+	}
+
+	@Test
+	public void getEventById_whenNotFound_returns404() throws Exception {
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+		given(eventService.getEventById(99L))
+				.willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+		MockHttpServletRequestBuilder getRequest = get("/events/99")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token");
+
+		mockMvc.perform(getRequest).andExpect(status().isNotFound());
 	}
 
 	/**

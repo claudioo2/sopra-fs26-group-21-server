@@ -61,6 +61,14 @@ public class EventService {
         return eventRepository.save(newEvent);
     } 
 
+    public Event getEventById(Long id) {
+        Event event = eventRepository.findById((long) id);
+        if (event == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
+        }
+        return event;
+    }
+
     public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm) {
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();

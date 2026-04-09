@@ -51,8 +51,10 @@ public interface DTOMapper {
 	@Mapping(source = "latitude", target = "latitude")
 	@Mapping(source = "longitude", target = "longitude")
 	@Mapping(source = "isPrivate", target = "isPrivate")
-    @Mapping(target = "creatorId", ignore = true)
-    @Mapping(target = "participantCount", ignore = true)
+    @Mapping(source = "creator.id", target = "creatorId")
+    @Mapping(source = "creator.username", target = "creatorUsername")
+    @Mapping(target = "participantCount", expression = "java(event.getParticipants() != null ? event.getParticipants().size() : 0)")
+    @Mapping(source = "pictureUrls", target = "pictureUrls")
 	EventGetDTO convertEntityToEventGetDTO(Event event);
 
 
@@ -63,7 +65,8 @@ public interface DTOMapper {
     @Mapping(source = "latitude", target = "latitude")
     @Mapping(source = "longitude", target = "longitude")
     @Mapping(source = "isPrivate", target = "isPrivate")
+    @Mapping(source = "pictureUrls", target = "pictureUrls")
     @Mapping(target = "creator", ignore = true)
     @Mapping(target = "participants", ignore = true)
-    Event convertEventGetDTOtoEntity(EventPostDTO eventPostDTO);
+    Event convertEventPostDTOtoEntity(EventPostDTO eventPostDTO);
 }

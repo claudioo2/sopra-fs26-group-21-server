@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,6 +60,11 @@ public class Event implements Serializable {
     @ManyToMany
     @JoinTable(name = "event_participants")
     private List<User> participants;
+
+    @ElementCollection
+    @CollectionTable(name = "event_pictures", joinColumns = @JoinColumn(name = "event_id"))
+    @Column(name = "picture_url")
+    private List<String> pictureUrls = new ArrayList<>();
 
     /*
     * Missing fields:
@@ -144,5 +150,13 @@ public class Event implements Serializable {
 
     public void setParticipants(List<User> participants) {
         this.participants = participants;
+    }
+
+    public List<String> getPictureUrls() {
+        return pictureUrls;
+    }
+
+    public void setPictureUrls(List<String> pictureUrls) {
+        this.pictureUrls = pictureUrls;
     }
 }

@@ -34,9 +34,18 @@ public class EventController {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
-        Event eventData = DTOMapper.INSTANCE.convertEventGetDTOtoEntity(eventPostDTO);
+        Event eventData = DTOMapper.INSTANCE.convertEventPostDTOtoEntity(eventPostDTO);
         Event newEvent = eventService.createEvent(eventData, token);
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(newEvent);
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public EventGetDTO getEventById(@RequestHeader("Authorization") String authHeader, @PathVariable Long id) {
+        String token = authHeader.replace("Bearer ", "");
+        userService.validateToken(token);
+        Event event = eventService.getEventById(id);
+        return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
 
     @GetMapping
