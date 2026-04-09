@@ -12,7 +12,7 @@ public class EventGetDTO {
     private Double latitude;
     private Double longitude;
     private Boolean isPrivate;
-    // private String inviteCode;
+    private String inviteCode;
     // private String category;
     // private Boolean status;
     private Long creatorId;
@@ -84,13 +84,13 @@ public class EventGetDTO {
         this.isPrivate = isPrivate;
     }
 
-    //public String getInviteCode() {
-    //     return inviteCode;
-    // }
+    public String getInviteCode() {
+        return inviteCode;
+     }
 
-    // public void setInviteCode(String inviteCode) {
-    //     this.inviteCode = inviteCode;
-    // }
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
+     }
 
     // public String getCategory() {
     //     return category;

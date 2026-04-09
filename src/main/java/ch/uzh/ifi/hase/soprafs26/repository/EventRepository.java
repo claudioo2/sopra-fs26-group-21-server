@@ -9,5 +9,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.Event;
 public interface EventRepository extends JpaRepository<Event, Long> {
 	// Event findByName(String name);
 	Event findById(long id);
+
+	Event findByInviteCode(String inviteCode);
 	
 }

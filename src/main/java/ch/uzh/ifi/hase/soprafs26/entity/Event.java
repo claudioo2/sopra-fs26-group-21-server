@@ -66,6 +66,9 @@ public class Event implements Serializable {
     @Column(name = "picture_url")
     private List<String> pictureUrls = new ArrayList<>();
 
+    @Column(nullable = false, unique = true)
+    private String inviteCode;
+
     /*
     * Missing fields:
     * status, category, inviteCode, chat
@@ -159,4 +162,13 @@ public class Event implements Serializable {
     public void setPictureUrls(List<String> pictureUrls) {
         this.pictureUrls = pictureUrls;
     }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
+    }
+
 }
