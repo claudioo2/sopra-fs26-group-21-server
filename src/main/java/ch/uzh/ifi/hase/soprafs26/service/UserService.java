@@ -56,6 +56,51 @@ public class UserService {
 		return newUser;
 	}
 
+<<<<<<< Updated upstream
+=======
+	public User loginUser(User loginAttempt) {
+		checkUserCredentials(loginAttempt);
+
+		User user = userRepository.findByUsername(loginAttempt.getUsername());
+		
+		user.setStatus(UserStatus.ONLINE);
+
+		userRepository.save(user);
+		userRepository.flush();
+
+		log.debug("Information of logged-in User: {}", user);
+		return user;
+	}
+
+	public User updateUser(Long id, User userUpdates) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (userUpdates.getUsername() != null && !userUpdates.getUsername().equals(user.getUsername())) {
+			User existing = userRepository.findByUsername(userUpdates.getUsername());
+			if (existing != null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is already taken");
+			}
+			user.setUsername(userUpdates.getUsername());
+		}
+		if (userUpdates.getBio() != null) {
+			user.setBio(userUpdates.getBio());
+		}
+
+		userRepository.save(user);
+		userRepository.flush();
+		return user;
+	}
+
+	public void validateToken(String token) {
+    User user = userRepository.findByToken(token);
+
+    if (user == null) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+    }
+	}
+
+>>>>>>> Stashed changes
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the
 	 * username and the name
