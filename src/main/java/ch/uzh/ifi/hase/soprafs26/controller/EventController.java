@@ -58,7 +58,7 @@ public class EventController {
 		String token = authHeader.replace("Bearer ", "");
 		userService.validateToken(token);
 		
-        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius);
+        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, token);
         List<EventGetDTO> eventGetDTOs = new ArrayList<>();
 
         for (Event event : events) {
