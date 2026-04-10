@@ -76,20 +76,23 @@ public class EventService {
         return event;
     }
 
-    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm) {
+    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, String token) {
+        User currentUser = userRepository.findByToken(token);
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
 
-
-        // filter all events that are in the radius
         return allEvents.stream()
-        .filter(event -> {
-            double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
-            return distance <= radiusKm;
-        })
-        .filter(event -> event.getEndTime().isAfter(now))
-        .filter(event -> !event.getIsPrivate())
-        .toList();
+            .filter(event -> {
+                double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
+                return distance <= radiusKm;
+            })
+            .filter(event -> event.getEndTime().isAfter(now))
+            .filter(event -> {
+                if (!event.getIsPrivate()) return true;
+                if (currentUser == null) return false;
+                return event.getParticipants() != null && event.getParticipants().contains(currentUser);
+            })
+            .toList();
     }
 
 
