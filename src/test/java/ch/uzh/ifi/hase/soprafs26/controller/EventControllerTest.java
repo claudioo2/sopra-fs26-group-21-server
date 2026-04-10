@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 
 import ch.uzh.ifi.hase.soprafs26.entity.User;
+import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
+
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -27,6 +29,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +48,9 @@ public class EventControllerTest {
 
 	@MockitoBean
 	private EventService eventService;
+
+	@MockitoBean
+	private EventRepository eventRepository;
 
 	@MockitoBean
 	private UserService userService;
@@ -125,6 +131,90 @@ public class EventControllerTest {
 				.header("Authorization", "Bearer test-token");
 
 		mockMvc.perform(getRequest).andExpect(status().isNotFound());
+	}
+
+	// POST /events/{eventId}/participants
+	@Test
+	public void joinEventById_whenEventPublic_returns201() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("alice");
+
+		Event event = new Event();
+		event.setId(1L);
+		event.setTitle("Public Event");
+		event.setIsPrivate(false);
+		event.setParticipants(List.of());
+
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+
+		given(eventService.joinEventById(1L, 1L)).willReturn(event);
+
+		MockHttpServletRequestBuilder postRequest = post("/events/1/participants")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token")
+				.content("{\"userId\": 1}");
+
+		mockMvc.perform(postRequest).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.title", is(event.getTitle())))
+				.andExpect(jsonPath("$.isPrivate", is(event.getIsPrivate())))
+				.andExpect(jsonPath("$.participantCount", is(0)));
+	}
+
+
+	@Test 
+	public void joinEventById_whenEventIsPrivate_returns403() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("alice");
+
+		Event event = new Event();
+		event.setId(1L);
+		event.setTitle("Private Event");
+		event.setIsPrivate(true);
+		event.setParticipants(List.of());
+
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+
+		given(eventService.joinEventById(1L, 1L))
+			.willThrow(new ResponseStatusException(
+				HttpStatus.FORBIDDEN,
+				"Cannot join a private event without an invite code"
+			));
+
+		MockHttpServletRequestBuilder postRequest = post("/events/1/participants")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token")
+				.content("{\"userId\": 1}");
+
+		mockMvc.perform(postRequest).andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void joinEventByinviteCode_whenEventIsPrivate_returns201() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("alice");
+
+		Event event = new Event();
+		event.setId(1L);
+		event.setTitle("Private Event");
+		event.setIsPrivate(true);
+		event.setParticipants(List.of());
+
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+
+		given(eventService.joinEventByInviteCode("invite-code", 1L)).willReturn(event);
+
+		MockHttpServletRequestBuilder postRequest = post("/events/participants")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token")
+				.content("{\"inviteCode\": \"invite-code\", \"userId\": 1}");
+
+		mockMvc.perform(postRequest).andExpect(status().isCreated())
+				.andExpect(jsonPath("$.title", is(event.getTitle())))
+				.andExpect(jsonPath("$.isPrivate", is(event.getIsPrivate())))
+				.andExpect(jsonPath("$.participantCount", is(0)));
 	}
 
 	/**
