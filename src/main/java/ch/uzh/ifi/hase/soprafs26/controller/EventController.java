@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs26.controller;
 
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByCodePostDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByIdPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
@@ -37,6 +39,28 @@ public class EventController {
         Event eventData = DTOMapper.INSTANCE.convertEventPostDTOtoEntity(eventPostDTO);
         Event newEvent = eventService.createEvent(eventData, token);
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(newEvent);
+    }
+
+    // Join event by eventId (meant for joins through event search)
+    @PostMapping("/{eventId}/participants")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public EventGetDTO joinEventById(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId, @RequestBody EventJoinByIdPostDTO eventJoinByIdPostDTO) {
+        String token = authHeader.replace("Bearer ", "");
+        userService.validateToken(token);
+        Event event = eventService.joinEventById(eventId, eventJoinByIdPostDTO.getUserId());
+        return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
+    }
+
+    // Join event by inviteCode (meant for joins through invitations)
+    @PostMapping("/participants")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public EventGetDTO joinEventBynviteCode(@RequestHeader("Authorization") String authHeader, @RequestBody EventJoinByCodePostDTO eventJoinByCodePostDTO) {
+        String token = authHeader.replace("Bearer ", "");
+        userService.validateToken(token);
+        Event event = eventService.joinEventByInviteCode(eventJoinByCodePostDTO.getInviteCode(), eventJoinByCodePostDTO.getUserId());
+        return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
 
     @GetMapping("/{id}")
