@@ -2,11 +2,13 @@ package ch.uzh.ifi.hase.soprafs26.controller;
 
 
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByCodePostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByIdPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
@@ -24,9 +26,12 @@ public class EventController {
 
     private final UserService userService;
 
-    EventController(EventService eventService, UserService userService) {
+    private final UserRepository userRepository;
+
+    EventController(EventService eventService, UserService userService, UserRepository userRepository) {
         this.eventService = eventService;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
@@ -84,9 +89,15 @@ public class EventController {
 		
         List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, token);
         List<EventGetDTO> eventGetDTOs = new ArrayList<>();
+        User currentUser = userRepository.findByToken(token);
 
         for (Event event : events) {
-			eventGetDTOs.add(DTOMapper.INSTANCE.convertEntityToEventGetDTO(event));
+            EventGetDTO dto = DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
+            boolean isParticipant = event.getParticipants() != null && currentUser != null &&
+                event.getParticipants().stream()
+                    .anyMatch(u -> u.getId().equals(currentUser.getId()));
+            dto.setIsParticipant(isParticipant);
+            eventGetDTOs.add(dto);
 		}
 
 		return eventGetDTOs;

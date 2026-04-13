@@ -21,6 +21,7 @@ import java.util.List;
 
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
+import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,9 @@ public class EventControllerTest {
 
 	@MockitoBean
 	private UserService userService;
+
+	@MockitoBean
+	private UserRepository userRepository;
 
 	@Test
 	public void givenEvents_whenGetEvents_thenReturnJsonArray() throws Exception {

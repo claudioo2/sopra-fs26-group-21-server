@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
@@ -84,5 +85,14 @@ public class UserController {
 	public UserGetDTO getUserById(@PathVariable("id") Long id) {
 		User user = userService.getUser(id);
 		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+	}
+
+	@PutMapping("/users/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public UserGetDTO updateUser(@PathVariable("id") Long id, @RequestBody UserPutDTO userPutDTO) {
+		User userUpdates = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+		User updatedUser = userService.updateUser(id, userUpdates);
+		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
 	}
 }

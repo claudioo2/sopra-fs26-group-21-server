@@ -19,6 +19,7 @@ public class EventGetDTO {
     private String creatorUsername;
     private Integer participantCount;
     private List<String> pictureUrls;
+    private Boolean isParticipant;
 
     public Long getId() {
         return id;
@@ -138,5 +139,13 @@ public class EventGetDTO {
 
     public void setPictureUrls(List<String> pictureUrls) {
         this.pictureUrls = pictureUrls;
+    }
+
+    public Boolean getIsParticipant() {
+        return isParticipant;
+    }
+
+    public void setIsParticipant(Boolean isParticipant) {
+        this.isParticipant = isParticipant;
     }
 }
