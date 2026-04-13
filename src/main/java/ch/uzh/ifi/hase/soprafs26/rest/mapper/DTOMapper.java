@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.entity.Message;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -70,4 +71,14 @@ public interface DTOMapper {
     @Mapping(target = "creator", ignore = true)
     @Mapping(target = "participants", ignore = true)
     Event convertEventPostDTOtoEntity(EventPostDTO eventPostDTO);
+
+    @Mapping(source = "sender.username", target = "senderUsername")
+    @Mapping(source = "event.id", target = "eventId")
+    MessageGetDTO convertEntityToMessageGetDTO(Message message);
+
+    @Mapping(target = "sender", ignore = true)
+    @Mapping(target = "event", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "timestamp", ignore = true)
+    Message convertMessagePostDTOtoEntity(MessagePostDTO messagePostDTO);
 }
