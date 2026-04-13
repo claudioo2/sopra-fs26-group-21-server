@@ -18,6 +18,7 @@ public class EventGetDTO {
     private Long creatorId;
     private String creatorUsername;
     private Integer participantCount;
+    private List<Long> participantIds;
     private List<String> pictureUrls;
     private Boolean isParticipant;
 
@@ -131,6 +132,14 @@ public class EventGetDTO {
 
     public void setParticipantCount(Integer participantCount) {
         this.participantCount = participantCount;
+    }
+
+    public List<Long> getParticipantIds() {
+        return participantIds;
+    }
+
+    public void setParticipantIds(List<Long> participantIds) {
+        this.participantIds = participantIds;
     }
 
     public List<String> getPictureUrls() {

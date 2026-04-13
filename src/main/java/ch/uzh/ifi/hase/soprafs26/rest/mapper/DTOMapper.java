@@ -64,6 +64,7 @@ public interface DTOMapper {
     @Mapping(source = "creator.id", target = "creatorId")
     @Mapping(source = "creator.username", target = "creatorUsername")
     @Mapping(target = "participantCount", expression = "java(event.getParticipants() != null ? event.getParticipants().size() : 0)")
+    @Mapping(target = "participantIds", expression = "java(event.getParticipants() != null ? event.getParticipants().stream().map(ch.uzh.ifi.hase.soprafs26.entity.User::getId).collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())")
     @Mapping(source = "pictureUrls", target = "pictureUrls")
     @Mapping(source = "inviteCode", target = "inviteCode")
 	EventGetDTO convertEntityToEventGetDTO(Event event);
