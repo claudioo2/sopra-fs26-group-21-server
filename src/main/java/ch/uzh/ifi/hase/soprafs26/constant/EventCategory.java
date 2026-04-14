@@ -7,6 +7,6 @@ public enum EventCategory {
     ART,
     SOCIAL,
     OUTDOOR,
-    GAMING,
+    PARTY,
     OTHER
 }
