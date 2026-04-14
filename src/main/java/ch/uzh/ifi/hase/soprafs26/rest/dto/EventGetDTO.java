@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class EventGetDTO {
     private Double longitude;
     private Boolean isPrivate;
     private String inviteCode;
+    private EventCategory category;
     // private String category;
     // private Boolean status;
     private Long creatorId;
@@ -148,6 +150,14 @@ public class EventGetDTO {
 
     public void setPictureUrls(List<String> pictureUrls) {
         this.pictureUrls = pictureUrls;
+    }
+
+    public EventCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(EventCategory category) {
+        this.category = category;
     }
 
     public Boolean getIsParticipant() {

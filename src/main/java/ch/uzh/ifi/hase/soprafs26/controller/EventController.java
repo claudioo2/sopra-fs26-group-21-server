@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
 
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
@@ -14,6 +15,7 @@ import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -80,14 +82,15 @@ public class EventController {
     @GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public List<EventGetDTO> getRadiusEvents(
-        @RequestHeader("Authorization") String authHeader, 
-        @RequestParam double latitude, 
-        @RequestParam double longitude, 
-        @RequestParam double radius) {
+        @RequestHeader("Authorization") String authHeader,
+        @RequestParam double latitude,
+        @RequestParam double longitude,
+        @RequestParam double radius,
+        @RequestParam(required = false) Set<EventCategory> categories) {
 		String token = authHeader.replace("Bearer ", "");
 		userService.validateToken(token);
-		
-        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, token);
+
+        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, token, categories);
         List<EventGetDTO> eventGetDTOs = new ArrayList<>();
         User currentUser = userRepository.findByToken(token);
 

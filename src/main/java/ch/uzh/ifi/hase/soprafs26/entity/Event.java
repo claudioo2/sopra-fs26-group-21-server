@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.entity;
 
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -52,6 +53,10 @@ public class Event implements Serializable {
 
     @Column(nullable = false)
     private Boolean isPrivate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventCategory category;
 
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
@@ -169,6 +174,14 @@ public class Event implements Serializable {
 
     public void setInviteCode(String inviteCode) {
         this.inviteCode = inviteCode;
+    }
+
+    public EventCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(EventCategory category) {
+        this.category = category;
     }
 
 }

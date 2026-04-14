@@ -1,4 +1,5 @@
 package ch.uzh.ifi.hase.soprafs26.service;
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -76,7 +79,7 @@ public class EventService {
         return event;
     }
 
-    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, String token) {
+    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, String token, Set<EventCategory> categories) {
         User currentUser = userRepository.findByToken(token);
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
@@ -92,6 +95,7 @@ public class EventService {
                 if (currentUser == null) return false;
                 return event.getParticipants() != null && event.getParticipants().contains(currentUser);
             })
+            .filter(event -> categories == null || categories.isEmpty() || categories.contains(event.getCategory()))
             .toList();
     }
 

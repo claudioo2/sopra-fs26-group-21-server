@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import java.time.LocalDateTime;
 import java.util.List;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +29,9 @@ public class EventPostDTO {
 
     @NotNull(message = "Privacy setting is required")
     private Boolean isPrivate;
+
+    @NotNull(message = "Category is required")
+    private EventCategory category;
 
     private List<String> pictureUrls;
 
@@ -86,6 +90,14 @@ public class EventPostDTO {
 
     public void setIsPrivate(Boolean isPrivate) {
         this.isPrivate = isPrivate;
+    }
+
+    public EventCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(EventCategory category) {
+        this.category = category;
     }
 
     public List<String> getPictureUrls() {
