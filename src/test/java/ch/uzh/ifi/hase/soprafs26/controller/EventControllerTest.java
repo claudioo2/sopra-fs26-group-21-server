@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
+import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
@@ -75,7 +77,7 @@ public class EventControllerTest {
 
 		// this mocks the EventService -> we define above what the eventService should
 		// return when getEventsInRadius() is called
-		given(eventService.getEventsInRadius(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyString()))
+		given(eventService.getEventsInRadius(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyString(), Mockito.<Set<EventCategory>>any()))
 			.willReturn(allEvents);
 
 		// when

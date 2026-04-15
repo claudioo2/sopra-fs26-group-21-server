@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import ch.uzh.ifi.hase.soprafs26.repository.MessageRepository;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.MessageGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.MessagePostDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;

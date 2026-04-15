@@ -3,7 +3,6 @@ import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
-//import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -12,16 +11,11 @@ import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//import org.slf4j.Logger;
-
-
-//import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 
