@@ -93,39 +93,6 @@ public class EventService {
             .toList();
     }
 
-    public Event joinEventById(Long eventId, Long userId) {
-        User userFromId = userRepository.findById(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        Event event = eventRepository.findById((long) eventId);
-        if (event == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
-        }
-        if (event.getIsPrivate()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot join a private event without an invite code");
-        }
-        if (event.getParticipants().contains(userFromId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
-        }
-        event.getParticipants().add(userFromId);
-        return eventRepository.save(event);
-    }
-
-    public Event joinEventByInviteCode(String inviteCode, Long userId) {
-        User userFromId = userRepository.findById(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        
-        Event event = eventRepository.findByInviteCode(inviteCode);
-        if (event == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
-        }
-        if (event.getParticipants().contains(userFromId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
-        }
-        event.getParticipants().add(userFromId);
-        return eventRepository.save(event);
-    }
-
 
     /// helper functions ///
     

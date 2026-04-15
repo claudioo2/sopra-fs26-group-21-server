@@ -1,0 +1,62 @@
+package ch.uzh.ifi.hase.soprafs26.service;
+import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.entity.User;
+import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
+
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.server.ResponseStatusException;
+
+
+@Service
+@Transactional
+public class ParticipantService {
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+
+    public ParticipantService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository) {
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+    }
+
+    public Event joinEventById(Long eventId, Long userId) {
+        User userFromId = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Event event = eventRepository.findById((long) eventId);
+        if (event == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
+        }
+        if (event.getIsPrivate()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot join a private event without an invite code");
+        }
+        if (event.getParticipants().contains(userFromId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
+        }
+        event.getParticipants().add(userFromId);
+        return eventRepository.save(event);
+    }
+
+    public Event joinEventByInviteCode(String inviteCode, Long userId) {
+        User userFromId = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        Event event = eventRepository.findByInviteCode(inviteCode);
+        if (event == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
+        }
+        if (event.getParticipants().contains(userFromId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
+        }
+        event.getParticipants().add(userFromId);
+        return eventRepository.save(event);
+    }
+
+
+    /// helper functions ///
+
+}

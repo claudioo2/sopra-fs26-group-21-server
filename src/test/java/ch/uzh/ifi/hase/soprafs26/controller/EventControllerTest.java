@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
+import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -60,6 +61,9 @@ public class EventControllerTest {
 
 	@MockitoBean
 	private UserRepository userRepository;
+
+	@MockitoBean
+	private ParticipantService participantService;
 
 	@Test
 	public void givenEvents_whenGetEvents_thenReturnJsonArray() throws Exception {
@@ -154,7 +158,7 @@ public class EventControllerTest {
 
 		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
 
-		given(eventService.joinEventById(1L, 1L)).willReturn(event);
+		given(participantService.joinEventById(1L, 1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder postRequest = post("/events/1/participants")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -182,7 +186,7 @@ public class EventControllerTest {
 
 		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
 
-		given(eventService.joinEventById(1L, 1L))
+		given(participantService.joinEventById(1L, 1L))
 			.willThrow(new ResponseStatusException(
 				HttpStatus.FORBIDDEN,
 				"Cannot join a private event without an invite code"
@@ -210,7 +214,7 @@ public class EventControllerTest {
 
 		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
 
-		given(eventService.joinEventByInviteCode("invite-code", 1L)).willReturn(event);
+		given(participantService.joinEventByInviteCode("invite-code", 1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder postRequest = post("/events/participants")
 				.contentType(MediaType.APPLICATION_JSON)

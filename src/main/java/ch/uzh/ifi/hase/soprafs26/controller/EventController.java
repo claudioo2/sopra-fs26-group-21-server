@@ -11,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
+import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +28,15 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
     private final EventService eventService;
 
+    private final ParticipantService participantService;
+
     private final UserService userService;
 
     private final UserRepository userRepository;
 
-    EventController(EventService eventService, UserService userService, UserRepository userRepository) {
+    EventController(EventService eventService, ParticipantService participantService, UserService userService, UserRepository userRepository) {
         this.eventService = eventService;
+        this.participantService = participantService;
         this.userService = userService;
         this.userRepository = userRepository;
     }
@@ -55,7 +60,7 @@ public class EventController {
     public EventGetDTO joinEventById(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId, @RequestBody EventJoinByIdPostDTO eventJoinByIdPostDTO) {
         String token = authHeader.replace("Bearer ", "");
         userService.validateToken(token);
-        Event event = eventService.joinEventById(eventId, eventJoinByIdPostDTO.getUserId());
+        Event event = participantService.joinEventById(eventId, eventJoinByIdPostDTO.getUserId());
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
 
@@ -66,7 +71,7 @@ public class EventController {
     public EventGetDTO joinEventBynviteCode(@RequestHeader("Authorization") String authHeader, @RequestBody EventJoinByCodePostDTO eventJoinByCodePostDTO) {
         String token = authHeader.replace("Bearer ", "");
         userService.validateToken(token);
-        Event event = eventService.joinEventByInviteCode(eventJoinByCodePostDTO.getInviteCode(), eventJoinByCodePostDTO.getUserId());
+        Event event = participantService.joinEventByInviteCode(eventJoinByCodePostDTO.getInviteCode(), eventJoinByCodePostDTO.getUserId());
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
 
