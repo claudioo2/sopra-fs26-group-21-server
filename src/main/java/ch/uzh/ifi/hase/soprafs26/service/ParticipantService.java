@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 
+import java.util.List;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,9 +20,12 @@ public class ParticipantService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
 
-    public ParticipantService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository) {
+    private final EventService eventService;
+
+    public ParticipantService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository, EventService eventService) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.eventService = eventService;
     }
 
     public Event joinEventById(Long eventId, Long userId) {
@@ -54,6 +59,25 @@ public class ParticipantService {
         }
         event.getParticipants().add(userFromId);
         return eventRepository.save(event);
+    }
+
+    public void removeParticipantFromEvent(long userId, Long eventId) {
+        Event event = eventService.getEventById(eventId);
+        if (event == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event to be deleted could not be found");
+        }
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User to be deleted could not be found");
+        }
+
+        List<User> participants = event.getParticipants();
+        if (!participants.contains(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not a participant of the event");
+        }
+        participants.remove(user);
+        eventRepository.save(event);
+
     }
 
 

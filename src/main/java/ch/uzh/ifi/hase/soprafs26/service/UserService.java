@@ -98,6 +98,15 @@ public class UserService {
     }
 	}
 
+	public void validateTokenToUser(String token, Long userId) {
+		validateToken(token);
+    	User user = userRepository.findByToken(token);
+		if (!user.getId().equals(userId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Token does not match users ID");
+		}
+
+	}
+
 
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the
