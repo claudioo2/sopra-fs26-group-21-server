@@ -112,6 +112,15 @@ public class EventController {
 
 	}
 
+    @DeleteMapping("/{eventId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteEvent(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId) {
+        String token = authHeader.replace("Bearer ", "");
+        userService.validateToken(token);
+        eventService.deleteEvent(eventId, token);
+    }
+
+
     @DeleteMapping("/{eventId}/participants/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void leaveEvent(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId, @PathVariable long userId) {

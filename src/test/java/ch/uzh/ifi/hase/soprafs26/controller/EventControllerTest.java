@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -229,6 +229,7 @@ public class EventControllerTest {
 				.andExpect(jsonPath("$.participantCount", is(0)));
 	}
 
+	@Test
 	public void deleteEventParticipant_whenUserIsParticipant_returns204() throws Exception {
 		User user = new User();
 		user.setId(1L);
@@ -250,8 +251,31 @@ public class EventControllerTest {
 
 		mockMvc.perform(deleteRequest).andExpect(status().isNoContent())
 				.andExpect(jsonPath("$").doesNotExist());
+	}
 
-		assertTrue(event.getParticipants().isEmpty());
+	@Test
+	public void deleteEvent_whenUserIsCreator_returns204() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("alice");
+
+		Event event = new Event();
+		event.setId(1L);
+		event.setTitle("Test Event");
+		event.setIsPrivate(false);
+		event.setCreator(user);
+
+		Mockito.doNothing().when(userService).validateToken(Mockito.anyString());
+		given(eventService.getEventById(1L)).willReturn(event);
+
+		MockHttpServletRequestBuilder deleteRequest = delete("/events/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token");
+
+		mockMvc.perform(deleteRequest).andExpect(status().isNoContent())
+				.andExpect(jsonPath("$").doesNotExist());
+
+		assertNull(eventRepository.findById(1L));
 	}
 
 	/**

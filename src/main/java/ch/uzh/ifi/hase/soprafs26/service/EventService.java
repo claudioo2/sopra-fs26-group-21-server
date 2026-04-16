@@ -93,6 +93,21 @@ public class EventService {
             .toList();
     }
 
+    public void deleteEvent(Long eventId, String token) {
+        User userFromToken = userRepository.findByToken(token);
+        if (userFromToken == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
+        }
+        Event event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
+        }
+        if (!event.getCreator().getId().equals(userFromToken.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can delete the event");
+        }
+        eventRepository.delete(event);
+    }
+
 
     /// helper functions ///
     
