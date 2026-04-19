@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
+import ch.uzh.ifi.hase.soprafs26.authentication.AuthenticatedUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,9 +74,8 @@ public class UserController {
 
 	@GetMapping("/auth/validate")
 	@ResponseStatus(HttpStatus.OK)
-	public void validateToken(@RequestHeader("Authorization") String authHeader) {
-		String token = authHeader.replace("Bearer ", "");
-		userService.validateToken(token);
+	public void validateToken(@AuthenticatedUser User user) {
+        // the @Authenticated User user handles tokens/user already no need to verify anything here no more
 	}
 
 

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
 
+import ch.uzh.ifi.hase.soprafs26.authentication.AuthenticatedUser;
 import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
@@ -9,10 +10,8 @@ import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByCodePostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByIdPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
-import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,26 +29,17 @@ public class EventController {
 
     private final ParticipantService participantService;
 
-    private final UserService userService;
-
-    private final UserRepository userRepository;
-
-    EventController(EventService eventService, ParticipantService participantService, UserService userService, UserRepository userRepository) {
+    EventController(EventService eventService, ParticipantService participantService) {
         this.eventService = eventService;
         this.participantService = participantService;
-        this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public EventGetDTO createEvent(@RequestHeader("Authorization") String token, @Valid @RequestBody EventPostDTO eventPostDTO){
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
+    public EventGetDTO createEvent(@AuthenticatedUser User user, @Valid @RequestBody EventPostDTO eventPostDTO){
         Event eventData = DTOMapper.INSTANCE.convertEventPostDTOtoEntity(eventPostDTO);
-        Event newEvent = eventService.createEvent(eventData, token);
+        Event newEvent = eventService.createEvent(eventData, user);
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(newEvent);
     }
 
@@ -57,9 +47,7 @@ public class EventController {
     @PostMapping("/{eventId}/participants")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public EventGetDTO joinEventById(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId, @RequestBody EventJoinByIdPostDTO eventJoinByIdPostDTO) {
-        String token = authHeader.replace("Bearer ", "");
-        userService.validateToken(token);
+    public EventGetDTO joinEventById(@AuthenticatedUser User user, @PathVariable Long eventId, @RequestBody EventJoinByIdPostDTO eventJoinByIdPostDTO) {
         Event event = participantService.joinEventById(eventId, eventJoinByIdPostDTO.getUserId());
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
@@ -68,18 +56,14 @@ public class EventController {
     @PostMapping("/participants")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public EventGetDTO joinEventBynviteCode(@RequestHeader("Authorization") String authHeader, @RequestBody EventJoinByCodePostDTO eventJoinByCodePostDTO) {
-        String token = authHeader.replace("Bearer ", "");
-        userService.validateToken(token);
+    public EventGetDTO joinEventBynviteCode(@AuthenticatedUser User user, @RequestBody EventJoinByCodePostDTO eventJoinByCodePostDTO) {
         Event event = participantService.joinEventByInviteCode(eventJoinByCodePostDTO.getInviteCode(), eventJoinByCodePostDTO.getUserId());
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventGetDTO getEventById(@RequestHeader("Authorization") String authHeader, @PathVariable Long id) {
-        String token = authHeader.replace("Bearer ", "");
-        userService.validateToken(token);
+    public EventGetDTO getEventById(@AuthenticatedUser User user, @PathVariable Long id) {
         Event event = eventService.getEventById(id);
         return DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
     }
@@ -87,23 +71,20 @@ public class EventController {
     @GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public List<EventGetDTO> getRadiusEvents(
-        @RequestHeader("Authorization") String authHeader,
+            @AuthenticatedUser User user,
         @RequestParam double latitude,
         @RequestParam double longitude,
         @RequestParam double radius,
         @RequestParam(required = false) Set<EventCategory> categories) {
-		String token = authHeader.replace("Bearer ", "");
-		userService.validateToken(token);
 
-        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, token, categories);
+        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, user, categories);
         List<EventGetDTO> eventGetDTOs = new ArrayList<>();
-        User currentUser = userRepository.findByToken(token);
 
         for (Event event : events) {
             EventGetDTO dto = DTOMapper.INSTANCE.convertEntityToEventGetDTO(event);
-            boolean isParticipant = event.getParticipants() != null && currentUser != null &&
+            boolean isParticipant = event.getParticipants() != null && user != null &&
                 event.getParticipants().stream()
-                    .anyMatch(u -> u.getId().equals(currentUser.getId()));
+                    .anyMatch(u -> u.getId().equals(user.getId()));
             dto.setIsParticipant(isParticipant);
             eventGetDTOs.add(dto);
 		}
@@ -114,18 +95,14 @@ public class EventController {
 
     @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId) {
-        String token = authHeader.replace("Bearer ", "");
-        userService.validateToken(token);
-        eventService.deleteEvent(eventId, token);
+    public void deleteEvent(@AuthenticatedUser User user, @PathVariable Long eventId) {
+        eventService.deleteEvent(eventId, user);
     }
 
 
     @DeleteMapping("/{eventId}/participants/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void leaveEvent(@RequestHeader("Authorization") String authHeader, @PathVariable Long eventId, @PathVariable long userId) {
-        String token = authHeader.replace("Bearer ", "");
-        userService.validateTokenToUser(token, userId);
+    public void leaveEvent(@AuthenticatedUser User user, @PathVariable Long eventId, @PathVariable long userId) {
         participantService.removeParticipantFromEvent(userId, eventId);
     }
 
