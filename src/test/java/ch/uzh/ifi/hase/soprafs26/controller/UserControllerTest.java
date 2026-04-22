@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
+import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -45,6 +46,9 @@ public class UserControllerTest {
 
 	@MockitoBean
 	private UserService userService;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
 	@Test
 	public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {

@@ -62,9 +62,8 @@ public class MessageService {
         return message;
     }
 
-    public List<Message> getChatHistory(Long eventId, String token) {
-        User userByToken = getUserByToken(token);
-        getEventIfAllowed(eventId, userByToken);
+    public List<Message> getChatHistory(Long eventId, User user) {
+        getEventIfAllowed(eventId, user);
         return messageRepository.findByEventIdOrderByTimestampAsc(eventId);
     }
 
