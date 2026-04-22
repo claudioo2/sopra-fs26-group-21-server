@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -88,7 +89,7 @@ public class EventControllerTest {
 
 		List<Event> allEvents = Collections.singletonList(event);
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		// this mocks the EventService -> we define above what the eventService should
 		// return when getEventsInRadius() is called
@@ -126,7 +127,7 @@ public class EventControllerTest {
 		event.setCreator(creator);
 		event.setParticipants(List.of(creator));
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder getRequest = get("/events/1")
@@ -143,7 +144,7 @@ public class EventControllerTest {
 
 	@Test
 	public void getEventById_whenNotFound_returns404() throws Exception {
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(99L))
 				.willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
@@ -167,7 +168,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventById(1L, 1L)).willReturn(event);
 
@@ -195,7 +196,7 @@ public class EventControllerTest {
 		event.setIsPrivate(true);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventById(1L, 1L))
 			.willThrow(new ResponseStatusException(
@@ -223,7 +224,7 @@ public class EventControllerTest {
 		event.setIsPrivate(true);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventByInviteCode("invite-code", 1L)).willReturn(event);
 
@@ -239,6 +240,31 @@ public class EventControllerTest {
 	}
 
 	@Test
+	public void updateEvent_whenUserIsCreator_returns204() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("alice");
+
+		Event event = new Event();
+		event.setId(1L);
+		event.setTitle("Test Event");
+		event.setIsPrivate(false);
+		event.setCreator(user);
+
+		//Mockito.doNothing().when(userService).validateToken(anyString());
+		given(eventService.getEventById(1L)).willReturn(event);
+
+		String updatedEventJson = "{\"title\": \"Updated Event\", \"description\": \"Updated Description\"}";
+
+		MockHttpServletRequestBuilder putRequest = put("/events/1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token")
+				.content(updatedEventJson);
+
+		mockMvc.perform(putRequest).andExpect(status().isNoContent());
+	}
+
+	@Test
 	public void deleteEventParticipant_whenUserIsParticipant_returns204() throws Exception {
 		User user = new User();
 		user.setId(1L);
@@ -250,7 +276,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setParticipants(List.of(user));
 
-		Mockito.doNothing().when(userService).validateTokenToUser(anyString(), Mockito.anyLong());
+		// Mockito.doNothing().when(userService).validateTokenToUser(anyString(), Mockito.anyLong());
 		given(eventService.getEventById(1L)).willReturn(event);
 		given(userRepository.findById(1L)).willReturn(user);
 
@@ -274,7 +300,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setCreator(user);
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder deleteRequest = delete("/events/1")
