@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs26.service;
 import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
-import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -25,26 +24,20 @@ public class EventService {
     //private final Logger log = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
 
-    public EventService(@Qualifier("eventRepository") EventRepository eventRepository, @Qualifier("userRepository") UserRepository userRepository) {
+    public EventService(@Qualifier("eventRepository") EventRepository eventRepository) {
         this.eventRepository = eventRepository;
-        this.userRepository = userRepository;
     }
 
 
-    public Event createEvent(Event newEvent, String token) {
-        User userFromToken = userRepository.findByToken(token);
-        if (userFromToken == null){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
-        }
+    public Event createEvent(Event newEvent, User user) {
         if (newEvent.getEndTime() != null && newEvent.getStartTime() != null
                 && !newEvent.getEndTime().isAfter(newEvent.getStartTime())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End time must be after start time");
         }
             List<User> participants = new ArrayList<>();
             // add creator to participants list
-            participants.add(userFromToken);
+            participants.add(user);
 
             // get the participants that are already sent in the request
             List<User> existingParticipants = newEvent.getParticipants();
@@ -54,7 +47,7 @@ public class EventService {
 
             // set participants to be all the participants including the creator
             newEvent.setParticipants(participants);
-        newEvent.setCreator(userFromToken);
+        newEvent.setCreator(user);
 
         String inviteCode;
         do {
@@ -73,8 +66,7 @@ public class EventService {
         return event;
     }
 
-    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, String token, Set<EventCategory> categories) {
-        User currentUser = userRepository.findByToken(token);
+    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, User user, Set<EventCategory> categories) {
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
 
@@ -86,23 +78,18 @@ public class EventService {
             .filter(event -> event.getEndTime().isAfter(now))
             .filter(event -> {
                 if (!event.getIsPrivate()) return true;
-                if (currentUser == null) return false;
-                return event.getParticipants() != null && event.getParticipants().contains(currentUser);
+                return event.getParticipants() != null && event.getParticipants().contains(user);
             })
             .filter(event -> categories == null || categories.isEmpty() || categories.contains(event.getCategory()))
             .toList();
     }
 
-    public void deleteEvent(Long eventId, String token) {
-        User userFromToken = userRepository.findByToken(token);
-        if (userFromToken == null){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid token");
-        }
+    public void deleteEvent(Long eventId, User user) {
         Event event = eventRepository.findById(eventId).orElse(null);
         if (event == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
         }
-        if (!event.getCreator().getId().equals(userFromToken.getId())) {
+        if (!event.getCreator().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can delete the event");
         }
         eventRepository.delete(event);

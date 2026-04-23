@@ -1,6 +1,8 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
+import ch.uzh.ifi.hase.soprafs26.authentication.AuthenticatedUser;
 import ch.uzh.ifi.hase.soprafs26.entity.Message;
+import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.MessageGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.MessagePostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
@@ -9,7 +11,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -32,12 +33,9 @@ public class MessageController {
     }
 
     @GetMapping("/events/{eventId}/messages")
-    public List<MessageGetDTO> getChatHistory(@PathVariable Long eventId, @RequestHeader("Authorization") String token){
-        if(token != null && token.startsWith("Bearer ")){
-            token = token.substring(7);
-        }
+    public List<MessageGetDTO> getChatHistory(@PathVariable Long eventId, @AuthenticatedUser User user){
         List<MessageGetDTO> result = new ArrayList<>();
-        for (Message m : messageService.getChatHistory(eventId, token)) {
+        for (Message m : messageService.getChatHistory(eventId, user)) {
             result.add(DTOMapper.INSTANCE.convertEntityToMessageGetDTO(m));
         }
         return result;
