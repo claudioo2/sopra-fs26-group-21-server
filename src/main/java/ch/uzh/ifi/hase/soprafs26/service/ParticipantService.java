@@ -66,10 +66,10 @@ public class ParticipantService {
         if (event == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event to be deleted could not be found");
         }
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User to be deleted could not be found");
-        }
+        User user = userRepository.findById(userId)
+        
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User to be deleted could not be found"));
+        
 
         List<User> participants = event.getParticipants();
         if (!participants.contains(user)) {

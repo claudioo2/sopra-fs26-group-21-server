@@ -46,6 +46,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Optional;
+
 
 /**
  * EntryControllerTest
@@ -313,7 +315,7 @@ public class EventControllerTest {
 
 		//Mockito.doNothing().when(userService).validateTokenToUser(anyString(), Mockito.anyLong());
 		given(eventService.getEventById(1L)).willReturn(event);
-		given(userRepository.findById(1L)).willReturn(user);
+		given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
 		MockHttpServletRequestBuilder deleteRequest = delete("/events/1/participants/1")
 				.contentType(MediaType.APPLICATION_JSON)
