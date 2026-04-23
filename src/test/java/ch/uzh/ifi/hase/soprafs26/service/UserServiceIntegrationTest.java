@@ -78,4 +78,43 @@ public class UserServiceIntegrationTest {
 		// check that an error is thrown
 		assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser2));
 	}
+
+	@Test
+	public void loginUser_validCredentials_success() {
+		// given
+		User testUser = new User();
+		testUser.setUsername("testUsername");
+		testUser.setPassword("testPassword");
+		userService.createUser(testUser);
+
+		User loginAttempt = new User();
+		loginAttempt.setUsername("testUsername");
+		loginAttempt.setPassword("testPassword");
+
+		// when
+		User loggedInUser = userService.loginUser(loginAttempt);
+
+		// then
+		assertEquals(testUser.getId(), loggedInUser.getId());
+		assertEquals(testUser.getUsername(), loggedInUser.getUsername());
+		assertEquals(testUser.getPassword(), loggedInUser.getPassword());
+		assertNotNull(loggedInUser.getToken());
+		assertEquals(UserStatus.ONLINE, loggedInUser.getStatus());
+	}
+
+	@Test
+	public void loginUser_invalidCredentials_throwsException() {
+		// given
+		User testUser = new User();
+		testUser.setUsername("testUsername");
+		testUser.setPassword("testPassword");
+		userService.createUser(testUser);
+
+		User loginAttempt = new User();
+		loginAttempt.setUsername("testUsername");
+		loginAttempt.setPassword("wrongPassword");
+
+		// check that an error is thrown
+		assertThrows(ResponseStatusException.class, () -> userService.loginUser(loginAttempt));
+	}
 }

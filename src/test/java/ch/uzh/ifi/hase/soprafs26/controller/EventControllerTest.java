@@ -4,6 +4,8 @@ import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 //import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +30,7 @@ import java.util.Set;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
 
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -38,6 +43,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,6 +83,61 @@ public class EventControllerTest {
     }
 
 	@Test
+	public void createEvent_whenValidInput_thenReturns201() throws Exception {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+		LocalDateTime startTime = LocalDateTime.of(2026, 1, 1, 10, 0);
+		LocalDateTime endTime = LocalDateTime.of(2026, 1, 2, 10, 0);
+		
+		User creator = new User();
+		creator.setId(1L);
+		creator.setUsername("alice");
+
+		Event event = new Event();
+		event.setTitle("Test Event");
+		event.setDescription("A description");
+		event.setIsPrivate(false);
+		event.setLatitude(47.3769);
+		event.setLongitude(8.5417);
+		event.setStartTime(startTime);
+		event.setEndTime(endTime);
+		event.setCategory(EventCategory.SPORTS);
+		event.setCreator(creator);
+
+		EventPostDTO eventPostDTO = new EventPostDTO();
+		eventPostDTO.setTitle("Test Event");
+		eventPostDTO.setDescription("A description");
+		eventPostDTO.setIsPrivate(false);
+		eventPostDTO.setLatitude(47.3769);
+		eventPostDTO.setLongitude(8.5417);
+		eventPostDTO.setStartTime(startTime);
+		eventPostDTO.setEndTime(endTime);
+		eventPostDTO.setCategory(EventCategory.SPORTS);
+
+		// Mockito.doNothing().when(userService).validateToken(anyString());
+		given(eventService.createEvent(Mockito.any(Event.class), Mockito.any(User.class)))
+				.willReturn(event);
+
+		MockHttpServletRequestBuilder postRequest = post("/events")
+				.contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer test-token")
+				.content(asJsonString(eventPostDTO));
+
+
+		mockMvc.perform(postRequest)
+				.andExpect(status().isCreated())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.title", is(event.getTitle())))
+				.andExpect(jsonPath("$.description", is(event.getDescription())))
+				.andExpect(jsonPath("$.isPrivate", is(event.getIsPrivate())))
+				.andExpect(jsonPath("$.latitude", is(event.getLatitude())))
+				.andExpect(jsonPath("$.longitude", is(event.getLongitude())))
+				.andExpect(jsonPath("$.startTime", is(event.getStartTime().format(formatter))))
+				.andExpect(jsonPath("$.endTime", is(event.getEndTime().format(formatter))))
+				.andExpect(jsonPath("$.category", is(event.getCategory().toString())));
+	}
+
+	@Test
 	public void givenEvents_whenGetEvents_thenReturnJsonArray() throws Exception {
 		// given
 		Event event = new Event();
@@ -88,7 +149,7 @@ public class EventControllerTest {
 
 		List<Event> allEvents = Collections.singletonList(event);
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		// this mocks the EventService -> we define above what the eventService should
 		// return when getEventsInRadius() is called
@@ -126,7 +187,7 @@ public class EventControllerTest {
 		event.setCreator(creator);
 		event.setParticipants(List.of(creator));
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder getRequest = get("/events/1")
@@ -143,7 +204,7 @@ public class EventControllerTest {
 
 	@Test
 	public void getEventById_whenNotFound_returns404() throws Exception {
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		//Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(99L))
 				.willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
 
@@ -167,7 +228,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventById(1L, 1L)).willReturn(event);
 
@@ -195,7 +256,7 @@ public class EventControllerTest {
 		event.setIsPrivate(true);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventById(1L, 1L))
 			.willThrow(new ResponseStatusException(
@@ -223,7 +284,7 @@ public class EventControllerTest {
 		event.setIsPrivate(true);
 		event.setParticipants(List.of());
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 
 		given(participantService.joinEventByInviteCode("invite-code", 1L)).willReturn(event);
 
@@ -250,7 +311,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setParticipants(List.of(user));
 
-		Mockito.doNothing().when(userService).validateTokenToUser(anyString(), Mockito.anyLong());
+		//Mockito.doNothing().when(userService).validateTokenToUser(anyString(), Mockito.anyLong());
 		given(eventService.getEventById(1L)).willReturn(event);
 		given(userRepository.findById(1L)).willReturn(user);
 
@@ -274,7 +335,7 @@ public class EventControllerTest {
 		event.setIsPrivate(false);
 		event.setCreator(user);
 
-		Mockito.doNothing().when(userService).validateToken(anyString());
+		// Mockito.doNothing().when(userService).validateToken(anyString());
 		given(eventService.getEventById(1L)).willReturn(event);
 
 		MockHttpServletRequestBuilder deleteRequest = delete("/events/1")
@@ -295,12 +356,12 @@ public class EventControllerTest {
 	 * @param object
 	 * @return string
 	 */
-	// private String asJsonString(final Object object) {
-	// 	try {
-	// 		return new ObjectMapper().writeValueAsString(object);
-	// 	} catch (JacksonException e) {
-	// 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-	// 				String.format("The request body could not be created.%s", e.toString()));
-	// 	}
-	// }
+	private String asJsonString(final Object object) {
+		try {
+			return new ObjectMapper().writeValueAsString(object);
+		} catch (JacksonException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					String.format("The request body could not be created.%s", e.toString()));
+		}
+	}
 }
