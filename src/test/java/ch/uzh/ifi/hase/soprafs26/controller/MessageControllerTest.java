@@ -16,6 +16,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -73,6 +75,20 @@ public class MessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].content", is("Hello")));
+    }
+
+    @Test
+    public void getChatHistory_whenUserNotParticipant_returns403() throws Exception {
+        // given
+        given(messageService.getChatHistory(eq(1L), any(User.class)))
+            .willThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a participant"));
+
+        MockHttpServletRequestBuilder request = get("/events/1/messages")
+            .header("Authorization", "Bearer valid-token");
+
+        // when + then
+        mockMvc.perform(request)
+            .andExpect(status().isForbidden());
     }
 
     // Testing the websocket

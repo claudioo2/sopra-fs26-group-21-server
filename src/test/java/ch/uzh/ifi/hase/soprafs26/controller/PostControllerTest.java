@@ -103,11 +103,30 @@ public class PostControllerTest {
     }
 
 
+    @Test
+    public void createPost_invalidToken_returns401() throws Exception {
+        // given
+        given(postService.createPost(any(PostPostDTO.class)))
+            .willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"));
+
+        PostPostDTO dto = new PostPostDTO();
+        dto.setContent("some content");
+
+        MockHttpServletRequestBuilder request = post("/events/1/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(dto))
+            .header("Authorization", "Bearer invalid-token");
+
+        // when + then
+        mockMvc.perform(request)
+            .andExpect(status().isUnauthorized());
+    }
+
     /**
 	 * Helper Method to convert userPostDTO into a JSON string such that the input
 	 * can be processed
 	 * Input will look like this: {"name": "Test User", "username": "testUsername"}
-	 * 
+	 *
 	 * @param object
 	 * @return string
 	 */

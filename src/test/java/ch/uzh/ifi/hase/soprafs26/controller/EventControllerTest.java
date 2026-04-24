@@ -39,6 +39,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -350,11 +351,26 @@ public class EventControllerTest {
 		assertNull(eventRepository.findById(1L));
 	}
 
+	@Test
+	public void deleteEvent_whenUserIsNotCreator_returns403() throws Exception {
+		// given
+		Mockito.doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can delete this event"))
+			.when(eventService).deleteEvent(eq(1L), Mockito.any(User.class));
+
+		MockHttpServletRequestBuilder request = delete("/events/1")
+			.header("Authorization", "Bearer valid-token")
+			.contentType(MediaType.APPLICATION_JSON);
+
+		// when + then
+		mockMvc.perform(request)
+			.andExpect(status().isForbidden());
+	}
+
 	/**
 	 * Helper Method to convert userPostDTO into a JSON string such that the input
 	 * can be processed
 	 * Input will look like this: {"name": "Test User", "username": "testUsername"}
-	 * 
+	 *
 	 * @param object
 	 * @return string
 	 */
