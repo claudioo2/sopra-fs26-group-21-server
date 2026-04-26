@@ -81,9 +81,12 @@ public class UserService {
 			}
 			user.setUsername(userUpdates.getUsername());
 		}
-		if (userUpdates.getBio() != null) {
-			user.setBio(userUpdates.getBio());
-		}
+        if (userUpdates.getBio() != null) {
+            user.setBio(userUpdates.getBio());
+        }
+        if (userUpdates.getAllowPrivateMessages() != null) {
+            user.setAllowPrivateMessages(userUpdates.getAllowPrivateMessages());
+        }
 
 		userRepository.save(user);
 		userRepository.flush();

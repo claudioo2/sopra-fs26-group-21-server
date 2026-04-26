@@ -9,6 +9,7 @@ public class UserGetDTO {
 	private String username;
 	private UserStatus status;
 	private String bio;
+    private Boolean allowPrivateMessages;
 
 	public Long getId() {
 		return id;
@@ -49,4 +50,11 @@ public class UserGetDTO {
 	public void setBio(String bio) {
 		this.bio = bio;
 	}
+    public Boolean getAllowPrivateMessages() {
+        return allowPrivateMessages;
+    }
+
+    public void setAllowPrivateMessages(Boolean allowPrivateMessages) {
+        this.allowPrivateMessages = allowPrivateMessages;
+    }
 }

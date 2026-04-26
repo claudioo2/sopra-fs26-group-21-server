@@ -44,6 +44,9 @@ public class User implements Serializable {
 	@Column(nullable = true)
 	private String bio;
 
+    @Column(nullable = true)
+    private Boolean allowPrivateMessages = true;
+
 	public Long getId() {
 		return id;
 	}
@@ -99,4 +102,12 @@ public class User implements Serializable {
 	public void setBio(String bio) {
 		this.bio = bio;
 	}
+
+    public Boolean getAllowPrivateMessages() {
+        return allowPrivateMessages;
+    }
+
+    public void setAllowPrivateMessages(Boolean allowPrivateMessages) {
+        this.allowPrivateMessages = allowPrivateMessages;
+    }
 }

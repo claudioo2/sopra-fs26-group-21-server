@@ -34,7 +34,8 @@ public interface DTOMapper {
 	User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
 	@Mapping(source = "username", target = "username")
-	@Mapping(source = "bio", target = "bio")
+    @Mapping(source = "bio", target = "bio")
+    @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "token", ignore = true)
 	@Mapping(target = "status", ignore = true)
@@ -45,7 +46,8 @@ public interface DTOMapper {
 	// @Mapping(source = "name", target = "name")
 	@Mapping(source = "username", target = "username")
 	@Mapping(source = "status", target = "status")
-	@Mapping(source = "bio", target = "bio")
+    @Mapping(source = "bio", target = "bio")
+    @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
 	UserGetDTO convertEntityToUserGetDTO(User user);
 
 	@Mapping(source = "id", target = "id")
