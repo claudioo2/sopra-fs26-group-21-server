@@ -83,4 +83,25 @@ public class UserServiceTest {
 		assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
 	}
 
+
+
+    @Test
+    public void updateUser_setsAllowPrivateMessages_success() {
+        User existingUser = new User();
+        existingUser.setId(1L);
+        existingUser.setUsername("alice");
+        existingUser.setAllowPrivateMessages(true);
+
+        Mockito.when(userRepository.findById(1L))
+                .thenReturn(java.util.Optional.of(existingUser));
+
+        User updates = new User();
+        updates.setAllowPrivateMessages(false);
+
+        User result = userService.updateUser(1L, updates);
+
+        assertEquals(false, result.getAllowPrivateMessages());
+        Mockito.verify(userRepository, Mockito.times(1)).save(existingUser);
+    }
+
 }
