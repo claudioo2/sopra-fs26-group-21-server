@@ -104,4 +104,36 @@ public class UserServiceTest {
         Mockito.verify(userRepository, Mockito.times(1)).save(existingUser);
     }
 
+	@Test
+	public void followUser_validInput_success() {
+		// given
+		User follower = new User();
+		follower.setId(1L);
+		follower.setUsername("follower");
+
+		User target = new User();
+		target.setId(2L);
+		target.setUsername("target");
+
+		Mockito.when(userRepository.findById(1L))
+				.thenReturn(java.util.Optional.of(follower));
+
+		Mockito.when(userRepository.findById(2L))
+				.thenReturn(java.util.Optional.of(target));
+
+		Mockito.when(userRepository.save(Mockito.any(User.class)))
+        		.thenReturn(follower);
+
+		// when
+		User result = userService.followUser(1L, 2L);
+
+		// then
+		assertNotNull(result);
+
+		Mockito.verify(userRepository, Mockito.times(1))
+				.save(Mockito.any(User.class));
+
+		assertTrue(follower.getFollowing().contains(target));
+	}
+
 }

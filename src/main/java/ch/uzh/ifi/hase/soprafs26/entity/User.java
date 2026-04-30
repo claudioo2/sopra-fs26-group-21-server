@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Internal User Representation
@@ -46,6 +47,9 @@ public class User implements Serializable {
 
     @Column(nullable = true)
     private Boolean allowPrivateMessages = true;
+
+	@Column(nullable = true)
+	private List<User> following;
 
 	public Long getId() {
 		return id;
@@ -110,4 +114,12 @@ public class User implements Serializable {
     public void setAllowPrivateMessages(Boolean allowPrivateMessages) {
         this.allowPrivateMessages = allowPrivateMessages;
     }
+
+	public List<User> getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(List<User> following) {
+		this.following = following;
+	}
 }
