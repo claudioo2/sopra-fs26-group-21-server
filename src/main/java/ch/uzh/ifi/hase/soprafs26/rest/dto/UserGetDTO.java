@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
+import java.util.List;
+
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs26.entity.User;
 
 public class UserGetDTO {
 
@@ -9,6 +12,8 @@ public class UserGetDTO {
 	private String username;
 	private UserStatus status;
 	private String bio;
+    private Boolean allowPrivateMessages;
+	private List<User> following;
 
 	public Long getId() {
 		return id;
@@ -48,5 +53,20 @@ public class UserGetDTO {
 
 	public void setBio(String bio) {
 		this.bio = bio;
+	}
+    public Boolean getAllowPrivateMessages() {
+        return allowPrivateMessages;
+    }
+
+    public void setAllowPrivateMessages(Boolean allowPrivateMessages) {
+        this.allowPrivateMessages = allowPrivateMessages;
+    }
+
+	public List<User> getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(List<User> following) {
+		this.following = following;
 	}
 }

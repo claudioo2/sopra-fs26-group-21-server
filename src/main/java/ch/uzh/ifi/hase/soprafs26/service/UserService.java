@@ -81,15 +81,35 @@ public class UserService {
 			}
 			user.setUsername(userUpdates.getUsername());
 		}
-		if (userUpdates.getBio() != null) {
-			user.setBio(userUpdates.getBio());
-		}
+        if (userUpdates.getBio() != null) {
+            user.setBio(userUpdates.getBio());
+        }
+        if (userUpdates.getAllowPrivateMessages() != null) {
+            user.setAllowPrivateMessages(userUpdates.getAllowPrivateMessages());
+        }
 
 		userRepository.save(user);
 		userRepository.flush();
 		return user;
 	}
 
+	public User followUser(Long followerId, Long followeeId) {
+        User follower = userRepository.findById(followerId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follower not found"));
+        User followee = userRepository.findById(followeeId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Followee not found"));
+
+            
+        if (follower.getFollowing() == null) {
+            follower.setFollowing(List.of(followee));
+        } else if (!follower.getFollowing().contains(followee)) {
+            follower.getFollowing().add(followee);
+        } else {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already following this user");
+        }
+
+        return userRepository.save(follower);
+    }
 
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the

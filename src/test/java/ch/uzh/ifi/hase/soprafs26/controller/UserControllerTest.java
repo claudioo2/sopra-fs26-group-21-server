@@ -7,6 +7,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.FollowPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -184,6 +186,41 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$.id", is(userUpdated.getId().intValue())))
 				.andExpect(jsonPath("$.username", is(userUpdated.getUsername())))
 				.andExpect(jsonPath("$.status", is(userUpdated.getStatus().toString())));
+	
+	}
+
+	@Test
+	public void followUser_validInput_userFollowed() throws Exception {
+		// given
+		User follower = new User();
+		follower.setId(1L);
+		follower.setUsername("followerUsername");
+		follower.setToken("1");
+		follower.setStatus(UserStatus.ONLINE);
+
+		User targetUser = new User();
+		targetUser.setId(2L);
+		targetUser.setUsername("targetUsername");
+		targetUser.setToken("2");
+		targetUser.setStatus(UserStatus.ONLINE);
+
+		FollowPostDTO dto = new FollowPostDTO();
+		dto.setTargetUserId(targetUser.getId());
+
+		given(userRepository.findByToken(anyString())).willReturn(follower);
+
+		given(userService.followUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(targetUser);
+		// when/then -> do the request + validate the result
+		MockHttpServletRequestBuilder postRequest = post("/users/{userId}/follow", follower.getId())
+				.header("Authorization", "Bearer 1")
+				.content(asJsonString(dto))
+				.contentType(MediaType.APPLICATION_JSON);
+
+		mockMvc.perform(postRequest)
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.id", is(targetUser.getId().intValue())))
+				.andExpect(jsonPath("$.username", is(targetUser.getUsername())))
+				.andExpect(jsonPath("$.status", is(targetUser.getStatus().toString())));
 	
 	}
 
