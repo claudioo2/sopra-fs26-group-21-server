@@ -84,6 +84,68 @@ public class EventService {
             .toList();
     }
 
+    public Event updateEvent(Long eventId, Event updatedEvent, User user) {
+        Event existingEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Event not found"));
+
+        if (!existingEvent.getCreator().getId().equals(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Only the creator can update the event");
+        }
+
+        
+        LocalDateTime start = updatedEvent.getStartTime() != null
+                ? updatedEvent.getStartTime() : existingEvent.getStartTime();
+
+        LocalDateTime end = updatedEvent.getEndTime() != null
+                ? updatedEvent.getEndTime() : existingEvent.getEndTime();
+
+        if (start != null && end != null && !end.isAfter(start)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "End time must be after start time");
+        }
+
+        if (updatedEvent.getTitle() != null) {
+            existingEvent.setTitle(updatedEvent.getTitle());
+        }
+
+        if (updatedEvent.getDescription() != null) {
+            existingEvent.setDescription(updatedEvent.getDescription());
+        }
+
+        if (updatedEvent.getStartTime() != null) {
+            existingEvent.setStartTime(updatedEvent.getStartTime());
+        }
+
+        if (updatedEvent.getEndTime() != null) {
+            existingEvent.setEndTime(updatedEvent.getEndTime());
+        }
+
+        if (updatedEvent.getLongitude() != null) {
+            existingEvent.setLongitude(updatedEvent.getLongitude());
+        }
+
+        if (updatedEvent.getLatitude() != null) {
+            existingEvent.setLatitude(updatedEvent.getLatitude());
+        }
+
+        if (updatedEvent.getIsPrivate() != null) {
+            existingEvent.setIsPrivate(updatedEvent.getIsPrivate());
+        }
+
+        if (updatedEvent.getCategory() != null) {
+            existingEvent.setCategory(updatedEvent.getCategory());
+        }
+
+        if (updatedEvent.getPictureUrls() != null) {
+            existingEvent.setPictureUrls(updatedEvent.getPictureUrls());
+        }
+
+        return eventRepository.save(existingEvent);
+}
+
+
     public void deleteEvent(Long eventId, User user) {
         Event event = eventRepository.findById(eventId).orElse(null);
         if (event == null) {

@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByCodePostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventJoinByIdPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPostDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPutDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
@@ -92,6 +93,13 @@ public class EventController {
 		return eventGetDTOs;
 
 	}
+
+    @PutMapping("/{eventId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateEvent(@AuthenticatedUser User user, @PathVariable Long eventId, @RequestBody EventPutDTO eventPutDTO) {
+        Event eventData = DTOMapper.INSTANCE.convertEventPutDTOtoEntity(eventPutDTO);
+        eventService.updateEvent(eventId, eventData, user);
+    }
 
     @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
