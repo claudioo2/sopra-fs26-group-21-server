@@ -7,7 +7,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.FollowPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
@@ -204,16 +203,13 @@ public class UserControllerTest {
 		targetUser.setToken("2");
 		targetUser.setStatus(UserStatus.ONLINE);
 
-		FollowPostDTO dto = new FollowPostDTO();
-		dto.setTargetUserId(targetUser.getId());
-
+		
 		given(userRepository.findByToken(anyString())).willReturn(follower);
 
 		given(userService.followUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(targetUser);
 		// when/then -> do the request + validate the result
-		MockHttpServletRequestBuilder postRequest = post("/users/{userId}/follow", follower.getId())
+		MockHttpServletRequestBuilder postRequest = post("/users/{targetUserId}/follow", targetUser.getId())
 				.header("Authorization", "Bearer 1")
-				.content(asJsonString(dto))
 				.contentType(MediaType.APPLICATION_JSON);
 
 		mockMvc.perform(postRequest)

@@ -31,6 +31,9 @@ public interface DTOMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "token", ignore = true)
 	@Mapping(target = "status", ignore = true)
+    @Mapping(target = "bio", ignore = true)
+    @Mapping(target = "allowPrivateMessages", ignore = true)
+    @Mapping(target = "following", ignore = true)
 	User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
 	@Mapping(source = "username", target = "username")
@@ -40,10 +43,8 @@ public interface DTOMapper {
 	@Mapping(target = "token", ignore = true)
 	@Mapping(target = "status", ignore = true)
 	@Mapping(target = "password", ignore = true)
+    @Mapping(target = "following", ignore = true)
 	User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
-
-    @Mapping(source = "targetUserId", target = "id")
-    User convertFollowPostDTOtoEntity(FollowPostDTO followPostDTO);
 
 	@Mapping(source = "id", target = "id")
 	// @Mapping(source = "name", target = "name")
@@ -75,6 +76,7 @@ public interface DTOMapper {
     @Mapping(target = "participantIds", expression = "java(event.getParticipants() != null ? event.getParticipants().stream().map(ch.uzh.ifi.hase.soprafs26.entity.User::getId).collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())")
     @Mapping(source = "pictureUrls", target = "pictureUrls")
     @Mapping(source = "inviteCode", target = "inviteCode")
+    @Mapping(target = "isParticipant", ignore = true)
 	EventGetDTO convertEntityToEventGetDTO(Event event);
 
 
@@ -89,6 +91,8 @@ public interface DTOMapper {
     @Mapping(source = "pictureUrls", target = "pictureUrls")
     @Mapping(target = "creator", ignore = true)
     @Mapping(target = "participants", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "inviteCode", ignore = true)
     Event convertEventPostDTOtoEntity(EventPostDTO eventPostDTO);
 
     @Mapping(source = "sender.username", target = "senderUsername")

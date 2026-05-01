@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,8 +49,13 @@ public class User implements Serializable {
     @Column(nullable = true)
     private Boolean allowPrivateMessages = true;
 
-	@Column(nullable = true)
-	private List<User> following;
+	@ManyToMany
+	@JoinTable(
+		name = "following",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "target_user_id")
+	)
+	private List<User> following = new ArrayList<>();
 
 	public Long getId() {
 		return id;

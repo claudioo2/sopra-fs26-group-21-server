@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ch.uzh.ifi.hase.soprafs26.entity.User;
-import ch.uzh.ifi.hase.soprafs26.rest.dto.FollowPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
@@ -100,13 +99,16 @@ public class UserController {
 
 	// follow users
 
-	@PostMapping("/users/{userId}/follow")
+	@PostMapping("/users/{targetUserId}/follow")
 	@ResponseStatus(HttpStatus.CREATED)
 	@ResponseBody
-	public UserGetDTO followUser(@AuthenticatedUser User follower, @PathVariable("userId") Long userId, @RequestBody FollowPostDTO followPostDTO) {
-		User userTargetInput = DTOMapper.INSTANCE.convertFollowPostDTOtoEntity(followPostDTO);
-		User targetUser = userService.followUser(userId, userTargetInput.getId());
-		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(targetUser);
+	public UserGetDTO followUser(
+			@AuthenticatedUser User follower,
+			@PathVariable Long targetUserId) {
+
+		User updatedUser = userService.followUser(follower.getId(),targetUserId);
+
+		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
 	}
 
 
