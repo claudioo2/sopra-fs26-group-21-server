@@ -1,8 +1,10 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
 import java.util.List;
+import java.util.Set;
 
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
+
 
 public class UserGetDTO {
 
@@ -11,7 +13,7 @@ public class UserGetDTO {
 	private UserStatus status;
 	private String bio;
     private Boolean allowPrivateMessages;
-	private List<UserGetDTO> following;
+	private Set<Long> followingIds;
 
 	public Long getId() {
 		return id;
@@ -52,11 +54,11 @@ public class UserGetDTO {
         this.allowPrivateMessages = allowPrivateMessages;
     }
 
-	public List<UserGetDTO> getFollowing() {
-		return following;
+	public Set<Long> getFollowingIds() {
+		return followingIds;
 	}
 
-	public void setFollowing(List<UserGetDTO> following) {
-		this.following = following;
+	public void setFollowingIds(Set<Long> followingIds) {
+		this.followingIds = followingIds;
 	}
 }

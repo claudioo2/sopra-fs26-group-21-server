@@ -111,6 +111,19 @@ public class UserController {
 		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
 	}
 
+	//unfollow
+	@DeleteMapping("/users/{targetUserId}/follow")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public UserGetDTO unfollowUser(
+			@AuthenticatedUser User follower,
+			@PathVariable Long targetUserId) {
+
+		User updatedUser = userService.unfollowUser(follower.getId(), targetUserId);
+
+		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
+	}
+
 
 
 }

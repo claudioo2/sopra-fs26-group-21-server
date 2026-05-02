@@ -52,7 +52,10 @@ public interface DTOMapper {
 	@Mapping(source = "status", target = "status")
     @Mapping(source = "bio", target = "bio")
     @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
-    @Mapping(source = "following", target = "following")
+    @Mapping(
+        target = "followingIds",
+        expression = "java(user.getFollowing() != null ? user.getFollowing().stream().map(ch.uzh.ifi.hase.soprafs26.entity.User::getId).collect(java.util.stream.Collectors.toSet()) : new java.util.HashSet<>())"
+    )
 	UserGetDTO convertEntityToUserGetDTO(User user);
 
 	@Mapping(source = "id", target = "id")

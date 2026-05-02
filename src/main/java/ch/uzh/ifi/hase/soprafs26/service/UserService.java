@@ -117,6 +117,28 @@ public class UserService {
 		return userRepository.save(follower);
 	}
 
+	public User unfollowUser(Long followerId, Long followeeId) {
+		if (followerId.equals(followeeId)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot unfollow yourself");
+		}
+
+		User follower = userRepository.findById(followerId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follower not found"));
+
+		userRepository.findById(followeeId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Followee not found"));
+
+		boolean removed = follower.getFollowing().removeIf(
+			user -> user.getId().equals(followeeId)
+		);
+
+		if (!removed) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "You are not following this user");
+		}
+
+		return userRepository.save(follower);
+	}
+
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the
 	 * username and the name

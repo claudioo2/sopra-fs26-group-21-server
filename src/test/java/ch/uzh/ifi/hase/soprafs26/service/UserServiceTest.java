@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.HashSet;
 
 public class UserServiceTest {
 
@@ -113,7 +114,7 @@ public class UserServiceTest {
 		User follower = new User();
 		follower.setId(1L);
 		follower.setUsername("follower");
-		follower.setFollowing(new ArrayList<>());
+		follower.setFollowing(new HashSet<>());
 
 		User target = new User();
 		target.setId(2L);
@@ -137,7 +138,10 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1))
 				.save(Mockito.any(User.class));
 
-		assertTrue(follower.getFollowing().contains(target));
+		assertTrue(
+            follower.getFollowing().stream()
+                    .anyMatch(user -> user.getId().equals(2L))
+    	);
 	}
 
 }

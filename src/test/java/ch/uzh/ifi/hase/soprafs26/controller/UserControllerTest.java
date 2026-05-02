@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -196,17 +197,23 @@ public class UserControllerTest {
 		follower.setUsername("followerUsername");
 		follower.setToken("1");
 		follower.setStatus(UserStatus.ONLINE);
+		follower.setFollowing(new HashSet<>());
 
 		User targetUser = new User();
 		targetUser.setId(2L);
 		targetUser.setUsername("targetUsername");
 		targetUser.setToken("2");
 		targetUser.setStatus(UserStatus.ONLINE);
+		targetUser.setFollowing(new HashSet<>());
+
+		follower.getFollowing().add(targetUser);
 
 		
 		given(userRepository.findByToken(anyString())).willReturn(follower);
 
-		given(userService.followUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(targetUser);
+		given(userService.followUser(follower.getId(), targetUser.getId()))
+            .willReturn(follower);
+
 		// when/then -> do the request + validate the result
 		MockHttpServletRequestBuilder postRequest = post("/users/{targetUserId}/follow", targetUser.getId())
 				.header("Authorization", "Bearer 1")
@@ -214,9 +221,10 @@ public class UserControllerTest {
 
 		mockMvc.perform(postRequest)
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.id", is(targetUser.getId().intValue())))
-				.andExpect(jsonPath("$.username", is(targetUser.getUsername())))
-				.andExpect(jsonPath("$.status", is(targetUser.getStatus().toString())));
+				.andExpect(jsonPath("$.id", is(follower.getId().intValue())))
+				.andExpect(jsonPath("$.username", is(follower.getUsername())))
+				.andExpect(jsonPath("$.status", is(follower.getStatus().toString())))
+				.andExpect(jsonPath("$.followingIds[0]", is(targetUser.getId().intValue())));
 	
 	}
 
