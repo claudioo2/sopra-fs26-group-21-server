@@ -146,6 +146,10 @@ public class EventService {
 }
 
 
+    public List<Event> getEventsByUserId(Long userId) {
+        return eventRepository.findByParticipantId(userId);
+    }
+
     public void deleteEvent(Long eventId, User user) {
         Event event = eventRepository.findById(eventId).orElse(null);
         if (event == null) {
