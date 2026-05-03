@@ -94,22 +94,50 @@ public class UserService {
 	}
 
 	public User followUser(Long followerId, Long followeeId) {
-        User follower = userRepository.findById(followerId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follower not found"));
-        User followee = userRepository.findById(followeeId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Followee not found"));
+		if (followerId.equals(followeeId)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot follow yourself");
+		}
 
-            
-        if (follower.getFollowing() == null) {
-            follower.setFollowing(List.of(followee));
-        } else if (!follower.getFollowing().contains(followee)) {
-            follower.getFollowing().add(followee);
-        } else {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already following this user");
-        }
+		User follower = userRepository.findById(followerId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follower not found"));
 
-        return userRepository.save(follower);
-    }
+		User followee = userRepository.findById(followeeId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Followee not found"));
+
+		// Check via ID (sicherer als contains)
+		boolean alreadyFollowing = follower.getFollowing().stream()
+			.anyMatch(user -> user.getId().equals(followeeId));
+
+		if (alreadyFollowing) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Already following this user");
+		}
+
+		follower.getFollowing().add(followee);
+
+		return userRepository.save(follower);
+	}
+
+	public User unfollowUser(Long followerId, Long followeeId) {
+		if (followerId.equals(followeeId)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot unfollow yourself");
+		}
+
+		User follower = userRepository.findById(followerId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Follower not found"));
+
+		userRepository.findById(followeeId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Followee not found"));
+
+		boolean removed = follower.getFollowing().removeIf(
+			user -> user.getId().equals(followeeId)
+		);
+
+		if (!removed) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "You are not following this user");
+		}
+
+		return userRepository.save(follower);
+	}
 
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the

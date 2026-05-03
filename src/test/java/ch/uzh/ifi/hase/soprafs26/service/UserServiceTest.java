@@ -14,6 +14,9 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Optional;
+import java.util.HashSet;
+
 public class UserServiceTest {
 
 	@Mock
@@ -110,19 +113,20 @@ public class UserServiceTest {
 		User follower = new User();
 		follower.setId(1L);
 		follower.setUsername("follower");
+		follower.setFollowing(new HashSet<>());
 
 		User target = new User();
 		target.setId(2L);
 		target.setUsername("target");
 
 		Mockito.when(userRepository.findById(1L))
-				.thenReturn(java.util.Optional.of(follower));
+				.thenReturn(Optional.of(follower));
 
 		Mockito.when(userRepository.findById(2L))
-				.thenReturn(java.util.Optional.of(target));
+				.thenReturn(Optional.of(target));
 
 		Mockito.when(userRepository.save(Mockito.any(User.class)))
-        		.thenReturn(follower);
+				.thenReturn(follower);
 
 		// when
 		User result = userService.followUser(1L, 2L);
@@ -133,7 +137,10 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1))
 				.save(Mockito.any(User.class));
 
-		assertTrue(follower.getFollowing().contains(target));
+		assertTrue(
+            follower.getFollowing().stream()
+                    .anyMatch(user -> user.getId().equals(2L))
+    	);
 	}
 
 }

@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Internal User Representation
@@ -48,8 +49,13 @@ public class User implements Serializable {
     @Column(nullable = true)
     private Boolean allowPrivateMessages = true;
 
-	@Column(nullable = true)
-	private List<User> following;
+	@ManyToMany
+	@JoinTable(
+		name = "following",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "target_user_id")
+	)
+	private Set<User> following = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -115,11 +121,11 @@ public class User implements Serializable {
         this.allowPrivateMessages = allowPrivateMessages;
     }
 
-	public List<User> getFollowing() {
+	public Set<User> getFollowing() {
 		return following;
 	}
 
-	public void setFollowing(List<User> following) {
+	public void setFollowing(Set<User> following) {
 		this.following = following;
 	}
 }
