@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs26.rest.dto;
 
-import java.util.List;
 import java.util.Set;
 
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;

@@ -5,11 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ch.uzh.ifi.hase.soprafs26.entity.User;
+import ch.uzh.ifi.hase.soprafs26.entity.Event;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
 import java.util.ArrayList;
@@ -26,10 +29,11 @@ import java.util.List;
 public class UserController {
 
 	private final UserService userService;
-	//private final FollowService followService;
+	private final EventService eventService;
 
-	UserController(UserService userService) {
+	UserController(UserService userService, EventService eventService) {
 		this.userService = userService;
+		this.eventService = eventService;
 	}
 
 	@GetMapping("/users")
@@ -95,6 +99,18 @@ public class UserController {
 		User userUpdates = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
 		User updatedUser = userService.updateUser(id, userUpdates);
 		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
+	}
+
+	@GetMapping("/users/{id}/events")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<EventGetDTO> getUserEvents(@PathVariable("id") Long id) {
+		List<Event> events = eventService.getEventsByUserId(id);
+		List<EventGetDTO> dtos = new ArrayList<>();
+		for (Event e : events) {
+			dtos.add(DTOMapper.INSTANCE.convertEntityToEventGetDTO(e));
+		}
+		return dtos;
 	}
 
 	// follow users

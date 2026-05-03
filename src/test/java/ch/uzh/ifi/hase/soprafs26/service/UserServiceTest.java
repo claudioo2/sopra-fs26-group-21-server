@@ -14,7 +14,6 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.HashSet;
 

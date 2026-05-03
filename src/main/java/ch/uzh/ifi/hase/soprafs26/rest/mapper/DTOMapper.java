@@ -98,6 +98,19 @@ public interface DTOMapper {
     @Mapping(target = "inviteCode", ignore = true)
     Event convertEventPostDTOtoEntity(EventPostDTO eventPostDTO);
 
+	@Mapping(source = "title", target = "title")
+	@Mapping(source = "description", target = "description")
+	@Mapping(source = "startTime", target = "startTime")
+	@Mapping(source = "endTime", target = "endTime")
+	@Mapping(source = "latitude", target = "latitude")
+	@Mapping(source = "longitude", target = "longitude")
+	@Mapping(source = "isPrivate", target = "isPrivate")
+	@Mapping(source = "category", target = "category")
+	@Mapping(source = "pictureUrls", target = "pictureUrls")
+	@Mapping(target = "creator", ignore = true)
+	@Mapping(target = "participants", ignore = true)
+	Event convertEventPutDTOtoEntity(EventPutDTO eventPutDTO);
+
     @Mapping(source = "sender.username", target = "senderUsername")
     @Mapping(source = "event.id", target = "eventId")
     MessageGetDTO convertEntityToMessageGetDTO(Message message);
