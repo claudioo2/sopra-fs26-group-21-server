@@ -39,6 +39,10 @@ public class RatingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Event has not ended yet");
         }
 
+        if (event.getCreator().getId().equals(rater.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Event creator cannot rate themselves");
+        }
+
         boolean isParticipant = event.getParticipants() != null
                 && event.getParticipants().stream().anyMatch(p -> p.getId().equals(rater.getId()));
         if (!isParticipant) {
