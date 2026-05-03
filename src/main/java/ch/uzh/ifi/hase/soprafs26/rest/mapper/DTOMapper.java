@@ -1,13 +1,9 @@
 package ch.uzh.ifi.hase.soprafs26.rest.mapper;
 
-import ch.uzh.ifi.hase.soprafs26.entity.Event;
-import ch.uzh.ifi.hase.soprafs26.entity.Message;
-import ch.uzh.ifi.hase.soprafs26.entity.Post;
+import ch.uzh.ifi.hase.soprafs26.entity.*;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
-
-import ch.uzh.ifi.hase.soprafs26.entity.User;
 
 /**
  * DTOMapper
@@ -54,6 +50,8 @@ public interface DTOMapper {
 	@Mapping(source = "status", target = "status")
     @Mapping(source = "bio", target = "bio")
     @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "ratingCount", ignore = true)
     @Mapping(
         target = "followingIds",
         expression = "java(user.getFollowing() != null ? user.getFollowing().stream().map(ch.uzh.ifi.hase.soprafs26.entity.User::getId).collect(java.util.stream.Collectors.toSet()) : new java.util.HashSet<>())"
@@ -127,4 +125,12 @@ public interface DTOMapper {
     @Mapping(source = "author.username", target = "authorUsername")
     @Mapping(source = "event.id", target = "eventId")
     PostGetDTO convertEntityToPostGetDTO(Post post);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "rater.id", target = "raterId")
+    @Mapping(source = "organizer.id", target = "organizerId")
+    @Mapping(source = "event.id", target = "eventId")
+    @Mapping(source = "score", target = "score")
+    @Mapping(source = "createdAt", target = "createdAt")
+    RatingGetDTO convertEntityToRatingGetDTO(Rating rating);
 }
