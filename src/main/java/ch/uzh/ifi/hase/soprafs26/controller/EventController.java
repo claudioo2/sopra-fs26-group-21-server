@@ -13,7 +13,7 @@ import ch.uzh.ifi.hase.soprafs26.rest.dto.EventPutDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs26.service.EventService;
 import ch.uzh.ifi.hase.soprafs26.service.ParticipantService;
-
+import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -113,5 +113,21 @@ public class EventController {
     public void leaveEvent(@AuthenticatedUser User user, @PathVariable Long eventId, @PathVariable long userId) {
         participantService.removeParticipantFromEvent(userId, eventId);
     }
+
+
+    @GetMapping("/{eventId}/participants")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<UserGetDTO> getEventParticipants(
+            @AuthenticatedUser User user,
+            @PathVariable Long eventId
+    ) {
+        List<User> participants = eventService.getEventParticipants(eventId);
+
+        return participants.stream()
+                .map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
+                .toList();
+    }
+    
 
 }
