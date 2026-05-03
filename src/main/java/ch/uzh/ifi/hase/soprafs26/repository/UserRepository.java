@@ -10,5 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	// User findByName(String name);
 	// User findById(long id); - testing removal
 	User findByUsername(String username);
+	User findByEmail(String email);
 	User findByToken(String token);
 }

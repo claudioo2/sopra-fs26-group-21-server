@@ -58,6 +58,7 @@ public class EventServiceIntegrationTest {
 
         creator = new User();
         creator.setUsername("creator");
+        creator.setEmail("creator@example.com");
         creator.setPassword("pw");
         creator.setToken("t-creator");
         creator.setStatus(UserStatus.ONLINE);
@@ -65,6 +66,7 @@ public class EventServiceIntegrationTest {
 
         searcher = new User();
         searcher.setUsername("searcher");
+        searcher.setEmail("searcher@example.com");
         searcher.setPassword("pw");
         searcher.setToken("t-searcher");
         searcher.setStatus(UserStatus.ONLINE);

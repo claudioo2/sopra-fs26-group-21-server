@@ -6,6 +6,7 @@ public class UserGetTokenDTO {
 
 	private Long id;
 	private String username;
+	private String email;
 	private UserStatus status;
     private String token;
 
@@ -23,6 +24,14 @@ public class UserGetTokenDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public UserStatus getStatus() {

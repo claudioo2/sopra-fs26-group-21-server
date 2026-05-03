@@ -27,6 +27,7 @@ public interface DTOMapper {
 
 	// @Mapping(source = "name", target = "name")
 	@Mapping(source = "username", target = "username")
+	@Mapping(source = "email", target = "email")
 	@Mapping(source = "password", target = "password")
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "token", ignore = true)
@@ -49,6 +50,7 @@ public interface DTOMapper {
 	@Mapping(source = "id", target = "id")
 	// @Mapping(source = "name", target = "name")
 	@Mapping(source = "username", target = "username")
+	@Mapping(source = "email", target = "email")
 	@Mapping(source = "status", target = "status")
     @Mapping(source = "bio", target = "bio")
     @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
@@ -60,6 +62,7 @@ public interface DTOMapper {
 
 	@Mapping(source = "id", target = "id")
 	@Mapping(source = "username", target = "username")
+	@Mapping(source = "email", target = "email")
 	@Mapping(source = "status", target = "status")
 	@Mapping(source = "token", target = "token")
 	UserGetTokenDTO convertEntityToUserGetTokenDTO(User user);

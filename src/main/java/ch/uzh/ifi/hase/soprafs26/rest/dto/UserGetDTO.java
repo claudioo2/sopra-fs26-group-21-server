@@ -9,6 +9,7 @@ public class UserGetDTO {
 
 	private Long id;
 	private String username;
+	private String email;
 	private UserStatus status;
 	private String bio;
     private Boolean allowPrivateMessages;
@@ -28,6 +29,14 @@ public class UserGetDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public UserStatus getStatus() {
