@@ -155,6 +155,9 @@ public class UserService {
 				? userRepository.findByEmail(userToBeCreated.getEmail())
 				: null;
 
+		if (userByUsername != null && userByEmail != null && userByUsername.getId().equals(userByEmail.getId())) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this username and email already exists. Please log in instead.");
+		}
 		String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
 		if (userByUsername != null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
