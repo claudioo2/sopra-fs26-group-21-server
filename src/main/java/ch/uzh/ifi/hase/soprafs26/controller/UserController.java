@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
 import ch.uzh.ifi.hase.soprafs26.authentication.AuthenticatedUser;
+import ch.uzh.ifi.hase.soprafs26.service.RatingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,12 +31,13 @@ public class UserController {
 
 	private final UserService userService;
 	private final EventService eventService;
+    private final RatingService ratingService;
 
-	UserController(UserService userService, EventService eventService) {
-		this.userService = userService;
-		this.eventService = eventService;
-	}
-
+    UserController(UserService userService, EventService eventService, RatingService ratingService) {
+        this.userService = userService;
+        this.eventService = eventService;
+        this.ratingService = ratingService;
+    }
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -84,13 +86,16 @@ public class UserController {
 	}
 
 
-	@GetMapping("/users/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public UserGetDTO getUserById(@PathVariable("id") Long id) {
-		User user = userService.getUser(id);
-		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-	}
+    @GetMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUserById(@PathVariable("id") Long id) {
+        User user = userService.getUser(id);
+        UserGetDTO dto = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+        dto.setAverageRating(ratingService.getAverageRating(user));
+        dto.setRatingCount(ratingService.getRatingCount(user));
+        return dto;
+    }
 
 	@PutMapping("/users/{id}")
 	@ResponseStatus(HttpStatus.OK)
