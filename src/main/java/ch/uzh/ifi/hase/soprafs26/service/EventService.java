@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.List;
 
 
 @Service
@@ -159,6 +160,16 @@ public class EventService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can delete the event");
         }
         eventRepository.delete(event);
+    }
+
+    public List<User> getEventParticipants(Long eventId) {
+        Event event = getEventById(eventId);
+
+        if (event.getParticipants() == null) {
+            return new ArrayList<>();
+        }
+
+        return event.getParticipants();
     }
 
 
