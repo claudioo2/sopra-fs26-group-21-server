@@ -9,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetPreviewDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
@@ -18,6 +19,7 @@ import ch.uzh.ifi.hase.soprafs26.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User Controller
@@ -119,6 +121,18 @@ public class UserController {
 	}
 
 	// follow users
+
+	@GetMapping("/users/following")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Set<UserGetPreviewDTO> getFollowingUsers(@AuthenticatedUser User user) {
+		Set<User> followingUsers = userService.getFollowingUsers(user.getId());
+		Set<UserGetPreviewDTO> userGetPreviewDTOs = new java.util.HashSet<>();
+		for (User u : followingUsers) {
+			userGetPreviewDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetPreviewDTO(u));
+		}
+		return userGetPreviewDTOs;
+	}
 
 	@PostMapping("/users/{targetUserId}/follow")
 	@ResponseStatus(HttpStatus.CREATED)
