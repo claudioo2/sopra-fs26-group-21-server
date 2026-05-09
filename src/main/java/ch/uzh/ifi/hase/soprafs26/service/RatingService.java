@@ -49,6 +49,10 @@ public class RatingService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only participants can rate the organizer");
         }
 
+        if (ratingRepository.existsByRaterAndEvent(rater, event)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already rated this event");
+        }
+
         Rating rating = new Rating();
         rating.setRater(rater);
         rating.setOrganizer(event.getCreator());
