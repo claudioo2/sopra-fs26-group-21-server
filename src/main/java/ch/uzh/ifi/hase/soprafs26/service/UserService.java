@@ -13,6 +13,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -137,6 +138,13 @@ public class UserService {
 		}
 
 		return userRepository.save(follower);
+	}
+
+	public Set<User> getFollowingUsers(Long userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		return user.getFollowing();
 	}
 
 	/**
