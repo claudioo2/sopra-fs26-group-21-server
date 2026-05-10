@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Set;
 
 /**
  * User Service
@@ -137,6 +138,33 @@ public class UserService {
 		}
 
 		return userRepository.save(follower);
+	}
+
+	public Set<User> getFollowing(Long userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				"User not found"
+			));
+
+		return user.getFollowing();
+	}
+
+	public List<User> getFollowers(Long userId) {
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResponseStatusException(
+						HttpStatus.NOT_FOUND,
+						"User not found"
+				));
+
+		return userRepository.findAll().stream()
+				.filter(possibleFollower ->
+						possibleFollower.getFollowing().stream()
+								.anyMatch(followedUser ->
+										followedUser.getId().equals(user.getId())
+								)
+				)
+				.toList();
 	}
 
 	/**
