@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
+import org.springframework.web.server.ResponseStatusException;
 
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
@@ -34,6 +34,7 @@ public class ParticipantServiceTest {
 
     private Event event;
     private User user;
+    private User eventCreator;
 
     @BeforeEach
     void setup() {
@@ -42,8 +43,12 @@ public class ParticipantServiceTest {
         user = new User();
         user.setId(1L);
 
+        eventCreator = new User();
+        eventCreator.setId(2L);
+
         event = new Event();
         event.setId(1L);
+        event.setCreator(eventCreator);
         event.setParticipants(new ArrayList<>());
         event.setIsPrivate(false);
     }
@@ -59,6 +64,25 @@ public class ParticipantServiceTest {
 
         assertFalse(event.getParticipants().contains(user));
         verify(eventRepository).save(event);
+    }
+
+    @Test
+    void creatorCannotLeaveEventTest() {
+        // the user gets now the creator
+        event.getParticipants().add(user);
+        event.getParticipants().add(eventCreator);
+
+        when(eventService.getEventById(1L)).thenReturn(event);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(eventCreator));
+
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> service.removeParticipantFromEvent(2L, 1L)
+        );
+
+        assertEquals(403, exception.getStatusCode().value());
+
+        verify(eventRepository, never()).save(any());
     }
 
     @Test
