@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
 import ch.uzh.ifi.hase.soprafs26.authentication.AuthenticatedUser;
+import ch.uzh.ifi.hase.soprafs26.service.RatingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,6 +9,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.EventGetDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetPreviewDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserGetTokenDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs26.rest.dto.UserPutDTO;
@@ -31,12 +33,13 @@ public class UserController {
 
 	private final UserService userService;
 	private final EventService eventService;
+    private final RatingService ratingService;
 
-	UserController(UserService userService, EventService eventService) {
-		this.userService = userService;
-		this.eventService = eventService;
-	}
-
+    UserController(UserService userService, EventService eventService, RatingService ratingService) {
+        this.userService = userService;
+        this.eventService = eventService;
+        this.ratingService = ratingService;
+    }
 	@GetMapping("/users")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
@@ -85,13 +88,16 @@ public class UserController {
 	}
 
 
-	@GetMapping("/users/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public UserGetDTO getUserById(@PathVariable("id") Long id) {
-		User user = userService.getUser(id);
-		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-	}
+    @GetMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUserById(@PathVariable("id") Long id) {
+        User user = userService.getUser(id);
+        UserGetDTO dto = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+        dto.setAverageRating(ratingService.getAverageRating(user));
+        dto.setRatingCount(ratingService.getRatingCount(user));
+        return dto;
+    }
 
 	@PutMapping("/users/{id}")
 	@ResponseStatus(HttpStatus.OK)
@@ -115,6 +121,18 @@ public class UserController {
 	}
 
 	// follow users
+
+	@GetMapping("/users/following")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public Set<UserGetPreviewDTO> getFollowingUsers(@AuthenticatedUser User user) {
+		Set<User> followingUsers = userService.getFollowingUsers(user.getId());
+		Set<UserGetPreviewDTO> userGetPreviewDTOs = new java.util.HashSet<>();
+		for (User u : followingUsers) {
+			userGetPreviewDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetPreviewDTO(u));
+		}
+		return userGetPreviewDTOs;
+	}
 
 	@PostMapping("/users/{targetUserId}/follow")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -145,7 +163,7 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public List<UserGetDTO> getFollowing(@PathVariable Long userId) {
-		Set<User> following = userService.getFollowing(userId);
+		Set<User> following = userService.getFollowingUsers(userId);
 
 		return following.stream()
 			.map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)

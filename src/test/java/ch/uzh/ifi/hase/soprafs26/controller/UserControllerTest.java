@@ -1,9 +1,9 @@
 package ch.uzh.ifi.hase.soprafs26.controller;
 
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs26.service.RatingService;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
-
 
 import ch.uzh.ifi.hase.soprafs26.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.HashSet;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -57,6 +58,9 @@ public class UserControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private RatingService ratingService;
 
 	@Test
 	public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
@@ -230,6 +234,35 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$.status", is(follower.getStatus().toString())))
 				.andExpect(jsonPath("$.followingIds[0]", is(targetUser.getId().intValue())));
 	
+	}
+
+	@Test
+	public void followingUsers_getFollowingUsers_followingUsersReturned() throws Exception {
+		// given
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("testUsername");
+
+		User followedUser = new User();
+		followedUser.setId(2L);
+		followedUser.setUsername("followedUsername");
+
+
+		user.setFollowing(new HashSet<>(Set.of(followedUser)));
+		
+		given(userRepository.findByToken(anyString())).willReturn(user);
+		given(userService.getFollowingUsers(user.getId())).willReturn(user.getFollowing());
+
+		// when/then -> do the request + validate the result
+		MockHttpServletRequestBuilder getRequest = get("/users/following")
+				.header("Authorization", "Bearer token")
+				.contentType(MediaType.APPLICATION_JSON);
+		
+		mockMvc.perform(getRequest)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].id", is(followedUser.getId().intValue())))
+				.andExpect(jsonPath("$[0].username", is(followedUser.getUsername())));
 	}
 
 	/**

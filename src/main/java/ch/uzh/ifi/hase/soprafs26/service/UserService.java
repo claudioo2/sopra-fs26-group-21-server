@@ -13,6 +13,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Set;
 
@@ -140,12 +141,9 @@ public class UserService {
 		return userRepository.save(follower);
 	}
 
-	public Set<User> getFollowing(Long userId) {
+	public Set<User> getFollowingUsers(Long userId) {
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ResponseStatusException(
-				HttpStatus.NOT_FOUND,
-				"User not found"
-			));
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
 		return user.getFollowing();
 	}
@@ -179,19 +177,20 @@ public class UserService {
 	 */
 	private void checkIfUserExists(User userToBeCreated) {
 		User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-		//User userByName = userRepository.findByName(userToBeCreated.getName());
+		User userByEmail = userToBeCreated.getEmail() != null
+				? userRepository.findByEmail(userToBeCreated.getEmail())
+				: null;
 
+		if (userByUsername != null && userByEmail != null && userByUsername.getId().equals(userByEmail.getId())) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this username and email already exists. Please log in instead.");
+		}
 		String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-		// if (userByUsername != null && userByName != null) {
-		// 	throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-		// 			String.format(baseErrorMessage, "username and the name", "are"));
-		// } 
 		if (userByUsername != null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-		} 
-		// else if (userByName != null) {
-		// 	throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
-		// }
+		}
+		if (userByEmail != null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "email", "is"));
+		}
 	}
 
 	private void checkUserCredentials(User userToBeCreated) {

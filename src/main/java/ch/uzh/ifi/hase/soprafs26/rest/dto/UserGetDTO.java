@@ -9,12 +9,31 @@ public class UserGetDTO {
 
 	private Long id;
 	private String username;
+	private String email;
 	private UserStatus status;
 	private String bio;
     private Boolean allowPrivateMessages;
 	private Set<Long> followingIds;
+    private Double averageRating;
+    private Integer ratingCount;
 
-	public Long getId() {
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public Integer getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(Integer ratingCount) {
+        this.ratingCount = ratingCount;
+    }
+
+    public Long getId() {
 		return id;
 	}
 
@@ -28,6 +47,14 @@ public class UserGetDTO {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public UserStatus getStatus() {

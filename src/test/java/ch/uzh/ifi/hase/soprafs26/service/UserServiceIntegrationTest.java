@@ -43,6 +43,7 @@ public class UserServiceIntegrationTest {
 		User testUser = new User();
 		// testUser.setName("testName");
 		testUser.setUsername("testUsername");
+		testUser.setEmail("test@example.com");
 		testUser.setPassword("testPassword");
 
 		// when
@@ -64,12 +65,14 @@ public class UserServiceIntegrationTest {
 		User testUser = new User();
 		// testUser.setName("testName");
 		testUser.setUsername("testUsername");
+		testUser.setEmail("test1@example.com");
 		testUser.setPassword("testPassword");
 		userService.createUser(testUser);
 
 		// attempt to create second user with same username
 		User testUser2 = new User();
 		testUser2.setPassword("testPassword2");
+		testUser2.setEmail("test2@example.com");
 
 		// change the username to the same one
 		// testUser2.setName("testName2");
@@ -84,6 +87,7 @@ public class UserServiceIntegrationTest {
 		// given
 		User testUser = new User();
 		testUser.setUsername("testUsername");
+		testUser.setEmail("login.valid@example.com");
 		testUser.setPassword("testPassword");
 		userService.createUser(testUser);
 
@@ -107,6 +111,7 @@ public class UserServiceIntegrationTest {
 		// given
 		User testUser = new User();
 		testUser.setUsername("testUsername");
+		testUser.setEmail("login.invalid@example.com");
 		testUser.setPassword("testPassword");
 		userService.createUser(testUser);
 

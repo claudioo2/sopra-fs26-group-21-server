@@ -15,6 +15,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.HashSet;
 
 public class UserServiceTest {
@@ -141,6 +142,31 @@ public class UserServiceTest {
             follower.getFollowing().stream()
                     .anyMatch(user -> user.getId().equals(2L))
     	);
+	}
+
+	@Test
+	public void followedUsers_getFollowingUsers_FollowingUsersReturned() {
+		// given
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("testUsername");
+
+		User followedUser = new User();
+		followedUser.setId(2L);
+		followedUser.setUsername("followedUsername");
+
+		user.setFollowing(new HashSet<>(Set.of(followedUser)));
+
+		Mockito.when(userRepository.findById(1L))
+				.thenReturn(Optional.of(user));
+
+		// when
+		Set<User> result = userService.getFollowingUsers(1L);
+
+		// then
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertTrue(result.equals(Set.of(followedUser)));
 	}
 
 }
