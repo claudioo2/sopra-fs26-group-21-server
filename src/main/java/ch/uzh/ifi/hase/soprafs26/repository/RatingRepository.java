@@ -12,4 +12,5 @@ import java.util.List;
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findByOrganizer(User organizer);
     Rating findByRaterAndEvent(User rater, Event event);
+    boolean existsByRaterAndEvent(User rater, Event event);
 }
