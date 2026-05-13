@@ -157,7 +157,7 @@ public class EventControllerTest {
 
 		// this mocks the EventService -> we define above what the eventService should
 		// return when getEventsInRadius() is called
-		given(eventService.getEventsInRadius(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any(User.class), Mockito.<Set<EventCategory>>any()))
+		given(eventService.getEventsInRadius(Mockito.anyDouble(), Mockito.anyDouble(), Mockito.anyDouble(), Mockito.any(User.class), Mockito.<Set<EventCategory>>any(), Mockito.anyBoolean()))
 			.willReturn(allEvents);
 
 		// when

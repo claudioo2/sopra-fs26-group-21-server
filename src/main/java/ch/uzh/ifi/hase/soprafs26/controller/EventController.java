@@ -76,9 +76,10 @@ public class EventController {
         @RequestParam double latitude,
         @RequestParam double longitude,
         @RequestParam double radius,
-        @RequestParam(required = false) Set<EventCategory> categories) {
+        @RequestParam(required = false) Set<EventCategory> categories,
+        @RequestParam(required = false, defaultValue = "false") boolean includePast) {
 
-        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, user, categories);
+        List<Event> events = eventService.getEventsInRadius(latitude, longitude, radius, user, categories, includePast);
         List<EventGetDTO> eventGetDTOs = new ArrayList<>();
 
         for (Event event : events) {

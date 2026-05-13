@@ -167,7 +167,7 @@ public class EventServiceIntegrationTest {
         // when -> searcher queries from Zurich, 20km radius, only SPORTS
         List<Event> result = eventService.getEventsInRadius(
                 ZURICH_LAT, ZURICH_LON, 20.0, searcher,
-                Set.of(EventCategory.SPORTS));
+                Set.of(EventCategory.SPORTS), false);
 
         // then -> only A and E should survive all four filters
         assertEquals(2, result.size());
@@ -177,7 +177,7 @@ public class EventServiceIntegrationTest {
 
         // without the category filter the SOCIAL event should reappear
         List<Event> noCategory = eventService.getEventsInRadius(
-                ZURICH_LAT, ZURICH_LON, 20.0, searcher, null);
+                ZURICH_LAT, ZURICH_LON, 20.0, searcher, null, false);
         assertTrue(noCategory.stream()
                 .anyMatch(e -> e.getTitle().equals("Wrong Category")));
     }

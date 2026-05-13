@@ -66,7 +66,7 @@ public class EventService {
         return event;
     }
 
-    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, User user, Set<EventCategory> categories) {
+    public List<Event> getEventsInRadius(double latitude, double longitude, double radiusKm, User user, Set<EventCategory> categories, boolean includePast) {
         List<Event> allEvents = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
 
@@ -75,7 +75,7 @@ public class EventService {
                 double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
                 return distance <= radiusKm;
             })
-            .filter(event -> event.getEndTime().isAfter(now))
+            .filter(event -> includePast || event.getEndTime().isAfter(now))
             .filter(event -> {
                 if (!event.getIsPrivate()) return true;
                 return event.getParticipants() != null && event.getParticipants().contains(user);
