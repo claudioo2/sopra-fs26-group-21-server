@@ -15,7 +15,6 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Set;
 
 /**
  * User Service

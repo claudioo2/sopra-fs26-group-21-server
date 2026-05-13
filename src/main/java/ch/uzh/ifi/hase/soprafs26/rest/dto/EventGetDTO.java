@@ -15,12 +15,10 @@ public class EventGetDTO {
     private Boolean isPrivate;
     private String inviteCode;
     private EventCategory category;
-    // private String category;
-    // private Boolean status;
     private Long creatorId;
     private String creatorUsername;
     private Integer participantCount;
-    private List<Long> participantIds;
+    private List<UserGetPreviewDTO> participants;
     private List<String> pictureUrls;
     private Boolean isParticipant;
 
@@ -96,22 +94,6 @@ public class EventGetDTO {
         this.inviteCode = inviteCode;
      }
 
-    // public String getCategory() {
-    //     return category;
-    // }
-
-    // public void setCategory(String category) {
-    //     this.category = category;
-    // }
-
-    // public Boolean getStatus() {
-    //     return status;
-    // }
-
-    // public void setStatus(Boolean status) {
-    //     this.status = status;
-    // }
-
     public Long getCreatorId() {
         return creatorId;
     }
@@ -136,12 +118,12 @@ public class EventGetDTO {
         this.participantCount = participantCount;
     }
 
-    public List<Long> getParticipantIds() {
-        return participantIds;
+    public List<UserGetPreviewDTO> getParticipants() {
+        return participants;
     }
 
-    public void setParticipantIds(List<Long> participantIds) {
-        this.participantIds = participantIds;
+    public void setParticipants(List<UserGetPreviewDTO> participants) {
+        this.participants = participants;
     }
 
     public List<String> getPictureUrls() {
