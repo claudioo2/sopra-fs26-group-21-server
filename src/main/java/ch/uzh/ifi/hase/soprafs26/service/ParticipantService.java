@@ -75,6 +75,11 @@ public class ParticipantService {
         if (!participants.contains(user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not a participant of the event");
         }
+
+        if (event.getCreator().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Event creator cannot leave the event");
+        }
+
         participants.remove(user);
         eventRepository.save(event);
 

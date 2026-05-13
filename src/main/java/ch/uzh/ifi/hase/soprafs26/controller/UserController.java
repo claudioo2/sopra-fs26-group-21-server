@@ -159,6 +159,28 @@ public class UserController {
 		return DTOMapper.INSTANCE.convertEntityToUserGetDTO(updatedUser);
 	}
 
+	@GetMapping("/users/{userId}/following")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<UserGetDTO> getFollowing(@PathVariable Long userId) {
+		Set<User> following = userService.getFollowingUsers(userId);
+
+		return following.stream()
+			.map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
+			.toList();
+	}
+
+	@GetMapping("/users/{userId}/followers")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<UserGetDTO> getFollowers(@PathVariable Long userId) {
+		List<User> followers = userService.getFollowers(userId);
+
+		return followers.stream()
+				.map(DTOMapper.INSTANCE::convertEntityToUserGetDTO)
+				.toList();
+	}
+
 
 
 }
