@@ -13,6 +13,7 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -139,6 +140,13 @@ public class UserService {
 		return userRepository.save(follower);
 	}
 
+	public Set<User> getFollowingUsers(Long userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		return user.getFollowing();
+	}
+
 	/**
 	 * This is a helper method that will check the uniqueness criteria of the
 	 * username and the name
@@ -155,6 +163,9 @@ public class UserService {
 				? userRepository.findByEmail(userToBeCreated.getEmail())
 				: null;
 
+		if (userByUsername != null && userByEmail != null && userByUsername.getId().equals(userByEmail.getId())) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this username and email already exists. Please log in instead.");
+		}
 		String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
 		if (userByUsername != null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));

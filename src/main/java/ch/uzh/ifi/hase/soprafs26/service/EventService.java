@@ -161,6 +161,16 @@ public class EventService {
         eventRepository.delete(event);
     }
 
+    public List<User> getEventParticipants(Long eventId) {
+        Event event = getEventById(eventId);
+
+        if (event.getParticipants() == null) {
+            return new ArrayList<>();
+        }
+
+        return event.getParticipants();
+    }
+
 
     /// helper functions ///
     
