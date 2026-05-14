@@ -40,7 +40,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-json'
-    implementation 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-h2console'
     // added dependency for websockets
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 

@@ -19,7 +19,8 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(columnDefinition = "CLOB")
     private String imageUrl;
 
     private String emoji;
