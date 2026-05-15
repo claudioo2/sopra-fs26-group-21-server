@@ -55,7 +55,7 @@ public class MessageService {
         message.setContent(messagePostDTO.getContent());
         message.setSender(userByToken);
         message.setEvent(eventByEventId);
-        message.setTimestamp(LocalDateTime.now());
+        message.setTimestamp(LocalDateTime.now(ZoneId.of("Europe/Zurich")));
 
         messageRepository.save(message);
 
