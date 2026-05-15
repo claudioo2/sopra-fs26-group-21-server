@@ -15,7 +15,6 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Set;
 
 /**
  * User Service
@@ -83,12 +82,25 @@ public class UserService {
 			}
 			user.setUsername(userUpdates.getUsername());
 		}
+		if (userUpdates.getEmail() != null && !userUpdates.getEmail().equals(user.getEmail())) {
+			User existing = userRepository.findByEmail(userUpdates.getEmail());
+			if (existing != null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already taken");
+			}
+			user.setEmail(userUpdates.getEmail());
+		}
         if (userUpdates.getBio() != null) {
             user.setBio(userUpdates.getBio());
         }
         if (userUpdates.getAllowPrivateMessages() != null) {
             user.setAllowPrivateMessages(userUpdates.getAllowPrivateMessages());
         }
+		if (userUpdates.getStatus() != null) {
+			user.setStatus(userUpdates.getStatus());
+		}
+		if (userUpdates.getPassword() != null) {
+			user.setPassword(userUpdates.getPassword());
+		}
 
 		userRepository.save(user);
 		userRepository.flush();
