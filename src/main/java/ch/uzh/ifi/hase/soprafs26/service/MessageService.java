@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -55,7 +56,7 @@ public class MessageService {
         message.setContent(messagePostDTO.getContent());
         message.setSender(userByToken);
         message.setEvent(eventByEventId);
-        message.setTimestamp(LocalDateTime.now());
+        message.setTimestamp(LocalDateTime.now(ZoneId.of("Europe/Zurich")));
 
         messageRepository.save(message);
 
