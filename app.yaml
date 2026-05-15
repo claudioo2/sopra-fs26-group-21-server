@@ -8,3 +8,10 @@ automatic_scaling:
   min_instances: 1
   max_instances: 1
   min_idle_instances: 1
+
+beta_settings:
+  cloud_sql_instances: sopra-fs26-group-21-server:europe-west6:sopra-fs26-db
+
+env_variables:
+  SPRING_PROFILES_ACTIVE: prod
+  DB_PASSWORD: "REPLACE_ME_BEFORE_DEPLOY"
