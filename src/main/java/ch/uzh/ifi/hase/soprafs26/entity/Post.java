@@ -20,7 +20,7 @@ public class Post {
     private String content;
 
     @Lob
-    @Column(columnDefinition = "CLOB")
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     private String emoji;

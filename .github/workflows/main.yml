@@ -52,6 +52,17 @@ jobs:
       - name: Build with Gradle
         run: chmod +x gradlew && ./gradlew build -x test --no-daemon
 
+      - name: Inject DB_PASSWORD into app.yaml
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          python3 -c "
+          import os
+          with open('app.yaml', 'r') as f: c = f.read()
+          c = c.replace('REPLACE_ME_BEFORE_DEPLOY', os.environ['DB_PASSWORD'])
+          with open('app.yaml', 'w') as f: f.write(c)
+          "
+
       - name: Deploy to App Engine
         id: deploy
         uses: google-github-actions/deploy-appengine@v0.2.0
