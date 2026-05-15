@@ -34,12 +34,13 @@ public interface DTOMapper {
 	User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
 	@Mapping(source = "username", target = "username")
+    @Mapping(source = "email", target = "email")
+    @Mapping(source = "password", target = "password")
     @Mapping(source = "bio", target = "bio")
     @Mapping(source = "allowPrivateMessages", target = "allowPrivateMessages")
+    @Mapping(source = "status", target = "status")
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "token", ignore = true)
-	@Mapping(target = "status", ignore = true)
-	@Mapping(target = "password", ignore = true)
     @Mapping(target = "following", ignore = true)
 	User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
@@ -114,6 +115,8 @@ public interface DTOMapper {
 	@Mapping(source = "pictureUrls", target = "pictureUrls")
 	@Mapping(target = "creator", ignore = true)
 	@Mapping(target = "participants", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "inviteCode", ignore = true)
 	Event convertEventPutDTOtoEntity(EventPutDTO eventPutDTO);
 
     @Mapping(source = "sender.username", target = "senderUsername")
