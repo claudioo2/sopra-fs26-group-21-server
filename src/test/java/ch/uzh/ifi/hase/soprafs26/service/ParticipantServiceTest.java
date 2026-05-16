@@ -75,5 +75,40 @@ public class ParticipantServiceTest {
 
         verify(eventRepository).save(event);
     }
-    
+
+    @Test
+    void joinEventByInviteCode_success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("CODE123")).thenReturn(event);
+        when(eventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Event result = service.joinEventByInviteCode("CODE123", 1L);
+
+        assertNotNull(result);
+        assertTrue(result.getParticipants().contains(user));
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    void joinEventByInviteCode_eventNotFound_throwsNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("INVALID")).thenReturn(null);
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("INVALID", 1L));
+    }
+
+    @Test
+    void joinEventByInviteCode_alreadyJoined_throwsConflict() {
+        event.getParticipants().add(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("CODE123")).thenReturn(event);
+
+        org.springframework.web.server.ResponseStatusException ex = assertThrows(
+                org.springframework.web.server.ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("CODE123", 1L));
+
+        assertEquals(org.springframework.http.HttpStatus.CONFLICT, ex.getStatusCode());
+    }
+
 }

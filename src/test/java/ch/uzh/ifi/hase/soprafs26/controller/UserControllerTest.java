@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -263,6 +264,68 @@ public class UserControllerTest {
 				.andExpect(jsonPath("$", hasSize(1)))
 				.andExpect(jsonPath("$[0].id", is(followedUser.getId().intValue())))
 				.andExpect(jsonPath("$[0].username", is(followedUser.getUsername())));
+	}
+
+	@Test
+	public void validateToken_validToken_returnsOk() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("testUsername");
+
+		given(userRepository.findByToken(anyString())).willReturn(user);
+
+		MockHttpServletRequestBuilder getRequest = get("/auth/validate")
+				.header("Authorization", "Bearer valid-token")
+				.contentType(MediaType.APPLICATION_JSON);
+
+		mockMvc.perform(getRequest)
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void getUserEvents_returnsEventList() throws Exception {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("testUsername");
+
+		ch.uzh.ifi.hase.soprafs26.entity.Event event = new ch.uzh.ifi.hase.soprafs26.entity.Event();
+		event.setId(10L);
+		event.setTitle("My Event");
+		event.setIsPrivate(false);
+		event.setCreator(user);
+		event.setParticipants(List.of(user));
+
+		given(eventService.getEventsByUserId(1L)).willReturn(List.of(event));
+
+		MockHttpServletRequestBuilder getRequest = get("/users/1/events")
+				.contentType(MediaType.APPLICATION_JSON);
+
+		mockMvc.perform(getRequest)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].title", is(event.getTitle())));
+	}
+
+	@Test
+	public void unfollowUser_validInput_returnsOk() throws Exception {
+		User follower = new User();
+		follower.setId(1L);
+		follower.setUsername("follower");
+		follower.setToken("token-1");
+		follower.setStatus(UserStatus.ONLINE);
+		follower.setFollowing(new HashSet<>());
+
+		given(userRepository.findByToken(anyString())).willReturn(follower);
+		given(userService.unfollowUser(follower.getId(), 2L)).willReturn(follower);
+
+		MockHttpServletRequestBuilder deleteRequest = delete("/users/2/follow")
+				.header("Authorization", "Bearer token-1")
+				.contentType(MediaType.APPLICATION_JSON);
+
+		mockMvc.perform(deleteRequest)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(follower.getId().intValue())))
+				.andExpect(jsonPath("$.username", is(follower.getUsername())));
 	}
 
 	/**

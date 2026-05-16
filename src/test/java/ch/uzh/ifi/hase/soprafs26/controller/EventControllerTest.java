@@ -392,6 +392,25 @@ public class EventControllerTest {
 			.andExpect(status().isForbidden());
 	}
 
+	@Test
+	public void getEventParticipants_returnsParticipantList() throws Exception {
+		User participant = new User();
+		participant.setId(2L);
+		participant.setUsername("participant");
+		participant.setStatus(ch.uzh.ifi.hase.soprafs26.constant.UserStatus.ONLINE);
+
+		given(eventService.getEventParticipants(1L)).willReturn(List.of(participant));
+
+		MockHttpServletRequestBuilder getRequest = get("/events/1/participants")
+				.header("Authorization", "Bearer test-token")
+				.contentType(MediaType.APPLICATION_JSON);
+
+		mockMvc.perform(getRequest)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].username", is(participant.getUsername())));
+	}
+
 	/**
 	 * Helper Method to convert userPostDTO into a JSON string such that the input
 	 * can be processed

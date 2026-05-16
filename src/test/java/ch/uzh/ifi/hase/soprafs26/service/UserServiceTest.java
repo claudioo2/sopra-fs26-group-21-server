@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
@@ -142,6 +143,108 @@ public class UserServiceTest {
             follower.getFollowing().stream()
                     .anyMatch(user -> user.getId().equals(2L))
     	);
+	}
+
+	@Test
+	public void getUsers_returnsAllUsers() {
+		User user2 = new User();
+		user2.setId(2L);
+		user2.setUsername("other");
+
+		Mockito.when(userRepository.findAll()).thenReturn(List.of(testUser, user2));
+
+		List<User> result = userService.getUsers();
+
+		assertEquals(2, result.size());
+	}
+
+	@Test
+	public void getUser_existingId_returnsUser() {
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+		User result = userService.getUser(1L);
+
+		assertNotNull(result);
+		assertEquals(testUser.getUsername(), result.getUsername());
+	}
+
+	@Test
+	public void getUser_notFound_throwsException() {
+		Mockito.when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(ResponseStatusException.class, () -> userService.getUser(99L));
+	}
+
+	@Test
+	public void loginUser_validCredentials_success() {
+		User stored = new User();
+		stored.setId(1L);
+		stored.setUsername("testUsername");
+		stored.setPassword("secret");
+		stored.setStatus(UserStatus.OFFLINE);
+
+		Mockito.when(userRepository.findByUsername("testUsername")).thenReturn(stored);
+		Mockito.when(userRepository.save(Mockito.any())).thenReturn(stored);
+
+		User loginAttempt = new User();
+		loginAttempt.setUsername("testUsername");
+		loginAttempt.setPassword("secret");
+
+		User result = userService.loginUser(loginAttempt);
+
+		assertEquals(UserStatus.ONLINE, result.getStatus());
+	}
+
+	@Test
+	public void loginUser_wrongPassword_throwsException() {
+		User stored = new User();
+		stored.setUsername("testUsername");
+		stored.setPassword("correct");
+
+		Mockito.when(userRepository.findByUsername("testUsername")).thenReturn(stored);
+
+		User loginAttempt = new User();
+		loginAttempt.setUsername("testUsername");
+		loginAttempt.setPassword("wrong");
+
+		assertThrows(ResponseStatusException.class, () -> userService.loginUser(loginAttempt));
+	}
+
+	@Test
+	public void unfollowUser_validInput_success() {
+		User follower = new User();
+		follower.setId(1L);
+		follower.setUsername("follower");
+
+		User followee = new User();
+		followee.setId(2L);
+		followee.setUsername("followee");
+
+		follower.setFollowing(new HashSet<>(Set.of(followee)));
+
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(follower));
+		Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(followee));
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(follower);
+
+		User result = userService.unfollowUser(1L, 2L);
+
+		assertNotNull(result);
+		assertTrue(follower.getFollowing().stream().noneMatch(u -> u.getId().equals(2L)));
+	}
+
+	@Test
+	public void unfollowUser_notFollowing_throwsConflict() {
+		User follower = new User();
+		follower.setId(1L);
+		follower.setFollowing(new HashSet<>());
+
+		User followee = new User();
+		followee.setId(2L);
+
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(follower));
+		Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(followee));
+
+		assertThrows(ResponseStatusException.class, () -> userService.unfollowUser(1L, 2L));
 	}
 
 	@Test
