@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository("eventRepository")
@@ -16,4 +17,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
 	@Query("SELECT e FROM Event e JOIN e.participants p WHERE p.id = :userId")
 	List<Event> findByParticipantId(@Param("userId") Long userId);
+
+	List<Event> findByCancelledAtIsNotNullAndCancelledAtBefore(LocalDateTime cutoff);
 }

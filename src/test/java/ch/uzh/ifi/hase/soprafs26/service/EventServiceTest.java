@@ -12,11 +12,13 @@ import ch.uzh.ifi.hase.soprafs26.entity.User;
 import org.springframework.http.HttpStatus;
 
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +33,9 @@ public class EventServiceTest {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private EventService eventService;
@@ -54,6 +59,7 @@ public class EventServiceTest {
 
         event = new Event();
         event.setId(10L);
+        event.setTitle("Test Event");
         event.setCreator(creator);
 
         
@@ -95,10 +101,14 @@ public class EventServiceTest {
         Long eventId = 10L;
 
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         eventService.deleteEvent(eventId, creator);
 
-        verify(eventRepository).delete(event);
+        verify(eventRepository, never()).delete(any());
+        verify(eventRepository).save(event);
+        assertNotNull(event.getCancelledAt());
+        verify(messagingTemplate).convertAndSend(eq("/topic/events/10/cancelled"), any(Object.class));
     }
 
 }

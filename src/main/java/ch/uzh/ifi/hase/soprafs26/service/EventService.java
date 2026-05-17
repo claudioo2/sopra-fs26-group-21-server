@@ -3,12 +3,16 @@ import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,9 +28,11 @@ public class EventService {
     //private final Logger log = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public EventService(@Qualifier("eventRepository") EventRepository eventRepository) {
+    public EventService(@Qualifier("eventRepository") EventRepository eventRepository, SimpMessagingTemplate messagingTemplate) {
         this.eventRepository = eventRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -71,6 +77,7 @@ public class EventService {
         LocalDateTime now = LocalDateTime.now();
 
         return allEvents.stream()
+            .filter(event -> event.getCancelledAt() == null)
             .filter(event -> {
                 double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
                 return distance <= radiusKm;
@@ -150,6 +157,8 @@ public class EventService {
         return eventRepository.findByParticipantId(userId);
     }
 
+    static final int CHAT_GRACE_HOURS = 24;
+
     public void deleteEvent(Long eventId, User user) {
         Event event = eventRepository.findById(eventId).orElse(null);
         if (event == null) {
@@ -158,7 +167,18 @@ public class EventService {
         if (!event.getCreator().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator can delete the event");
         }
-        eventRepository.delete(event);
+        event.setCancelledAt(LocalDateTime.now(ZoneId.of("Europe/Zurich")));
+        eventRepository.save(event);
+
+        Map<String, Object> payload = Map.of("eventId", eventId, "title", event.getTitle());
+        messagingTemplate.convertAndSend("/topic/events/" + eventId + "/cancelled", (Object) payload);
+    }
+
+    @Scheduled(fixedRate = 3_600_000)
+    public void cleanupCancelledEvents() {
+        LocalDateTime cutoff = LocalDateTime.now(ZoneId.of("Europe/Zurich")).minusHours(CHAT_GRACE_HOURS);
+        List<Event> expired = eventRepository.findByCancelledAtIsNotNullAndCancelledAtBefore(cutoff);
+        eventRepository.deleteAll(expired);
     }
 
     public List<User> getEventParticipants(Long eventId) {

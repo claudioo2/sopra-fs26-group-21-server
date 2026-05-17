@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -161,6 +162,65 @@ public class MessageServiceTest {
         ResponseStatusException ex = assertThrows(
             ResponseStatusException.class,
             () -> messageService.getChatHistory(10L, user)
+        );
+
+        assertEquals(404, ex.getStatusCode().value());
+        verify(messageRepository, never()).findByEventIdOrderByTimestampAsc(any());
+    }
+
+    // --- grace period tests ---
+
+    @Test
+    void saveMessage_eventCancelledWithinGracePeriod_success() {
+        event.setCancelledAt(LocalDateTime.now().minusHours(1));
+        when(userRepository.findByToken("valid-token")).thenReturn(user);
+        when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(event));
+        when(messageRepository.save(any(Message.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Message result = messageService.saveMessage(messagePostDTO);
+
+        assertNotNull(result);
+        verify(messageRepository).save(any(Message.class));
+    }
+
+    @Test
+    void saveMessage_eventCancelledAfterGracePeriod_throws404() {
+        event.setCancelledAt(LocalDateTime.now().minusHours(25));
+        when(userRepository.findByToken("valid-token")).thenReturn(user);
+        when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(event));
+
+        ResponseStatusException ex = assertThrows(
+            ResponseStatusException.class,
+            () -> messageService.saveMessage(messagePostDTO)
+        );
+
+        assertEquals(404, ex.getStatusCode().value());
+        verify(messageRepository, never()).save(any());
+    }
+
+    @Test
+    void getChatHistory_eventCancelledWithinGracePeriod_returnsMessages() {
+        event.setCancelledAt(LocalDateTime.now().minusHours(1));
+        Message m = new Message();
+        m.setContent("ultimo messaggio");
+
+        when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(event));
+        when(messageRepository.findByEventIdOrderByTimestampAsc(EVENT_ID)).thenReturn(List.of(m));
+
+        List<Message> result = messageService.getChatHistory(EVENT_ID, user);
+
+        assertEquals(1, result.size());
+        assertEquals("ultimo messaggio", result.get(0).getContent());
+    }
+
+    @Test
+    void getChatHistory_eventCancelledAfterGracePeriod_throws404() {
+        event.setCancelledAt(LocalDateTime.now().minusHours(25));
+        when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(event));
+
+        ResponseStatusException ex = assertThrows(
+            ResponseStatusException.class,
+            () -> messageService.getChatHistory(EVENT_ID, user)
         );
 
         assertEquals(404, ex.getStatusCode().value());

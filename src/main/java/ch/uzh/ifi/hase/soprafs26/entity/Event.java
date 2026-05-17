@@ -74,6 +74,8 @@ public class Event implements Serializable {
     @Column(nullable = false, unique = true)
     private String inviteCode;
 
+    private LocalDateTime cancelledAt;
+
     /*
     * Missing fields:
     * status, category, inviteCode, chat
@@ -182,6 +184,14 @@ public class Event implements Serializable {
 
     public void setCategory(EventCategory category) {
         this.category = category;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 
 }
