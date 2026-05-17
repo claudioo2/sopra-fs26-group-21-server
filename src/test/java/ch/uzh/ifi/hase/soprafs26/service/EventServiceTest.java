@@ -22,9 +22,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.List;
 import java.util.Optional;
-
-
 
 import java.time.LocalDateTime;
 
@@ -94,6 +93,21 @@ public class EventServiceTest {
 
         // ensure nothing is saved
         verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void getEventsByUserId_includesCancelledEvents() {
+        Event cancelledEvent = new Event();
+        cancelledEvent.setId(20L);
+        cancelledEvent.setTitle("Cancelled Event");
+        cancelledEvent.setCancelledAt(LocalDateTime.now().minusHours(1));
+
+        when(eventRepository.findByParticipantId(1L)).thenReturn(List.of(event, cancelledEvent));
+
+        List<Event> result = eventService.getEventsByUserId(1L);
+
+        assertEquals(2, result.size());
+        assertNotNull(result.get(1).getCancelledAt());
     }
 
     @Test

@@ -23,6 +23,7 @@ public class EventGetDTO {
     private List<Long> participantIds;
     private List<String> pictureUrls;
     private Boolean isParticipant;
+    private LocalDateTime cancelledAt;
 
     public Long getId() {
         return id;
@@ -166,5 +167,13 @@ public class EventGetDTO {
 
     public void setIsParticipant(Boolean isParticipant) {
         this.isParticipant = isParticipant;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 }
