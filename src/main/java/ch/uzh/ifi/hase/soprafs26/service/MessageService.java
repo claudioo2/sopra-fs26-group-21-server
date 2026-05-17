@@ -40,6 +40,13 @@ public class MessageService {
     private Event getEventIfAllowed(Long eventId, User user){
         Event eventByEventId = eventRepository.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("event with id %d does not exist", eventId)));
 
+        if (eventByEventId.getCancelledAt() != null) {
+            LocalDateTime gracePeriodEnd = eventByEventId.getCancelledAt().plusHours(ch.uzh.ifi.hase.soprafs26.service.EventService.CHAT_GRACE_HOURS);
+            if (LocalDateTime.now(ZoneId.of("Europe/Zurich")).isAfter(gracePeriodEnd)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("event with id %d is no longer available", eventId));
+            }
+        }
+
         if(!eventByEventId.getParticipants().contains(user)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "user is not allowed to post a message to this event, not a participant");
         }

@@ -95,10 +95,13 @@ public class EventServiceTest {
         Long eventId = 10L;
 
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         eventService.deleteEvent(eventId, creator);
 
-        verify(eventRepository).delete(event);
+        verify(eventRepository, never()).delete(any());
+        verify(eventRepository).save(event);
+        assertNotNull(event.getCancelledAt());
     }
 
 }
