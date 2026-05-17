@@ -3,6 +3,7 @@ import ch.uzh.ifi.hase.soprafs26.constant.EventCategory;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,9 +28,11 @@ public class EventService {
     //private final Logger log = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public EventService(@Qualifier("eventRepository") EventRepository eventRepository) {
+    public EventService(@Qualifier("eventRepository") EventRepository eventRepository, SimpMessagingTemplate messagingTemplate) {
         this.eventRepository = eventRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -165,6 +169,9 @@ public class EventService {
         }
         event.setCancelledAt(LocalDateTime.now(ZoneId.of("Europe/Zurich")));
         eventRepository.save(event);
+
+        Map<String, Object> payload = Map.of("eventId", eventId, "title", event.getTitle());
+        messagingTemplate.convertAndSend("/topic/events/" + eventId + "/cancelled", (Object) payload);
     }
 
     @Scheduled(fixedRate = 3_600_000)
