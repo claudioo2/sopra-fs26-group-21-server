@@ -85,6 +85,7 @@ public interface DTOMapper {
     @Mapping(target = "participantIds", expression = "java(event.getParticipants() != null ? event.getParticipants().stream().map(ch.uzh.ifi.hase.soprafs26.entity.User::getId).collect(java.util.stream.Collectors.toList()) : new java.util.ArrayList<>())")
     @Mapping(source = "pictureUrls", target = "pictureUrls")
     @Mapping(source = "inviteCode", target = "inviteCode")
+    @Mapping(source = "cancelledAt", target = "cancelledAt")
     @Mapping(target = "isParticipant", ignore = true)
 	EventGetDTO convertEntityToEventGetDTO(Event event);
 
