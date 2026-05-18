@@ -125,6 +125,24 @@ public class RatingControllerTest {
     }
 
     @Test
+    public void rateOrganizer_duplicateRating_returnsConflict() throws Exception {
+        given(userRepository.findByToken(anyString())).willReturn(rater);
+        given(ratingService.createRating(Mockito.eq(10L), Mockito.any(User.class), Mockito.eq(4)))
+                .willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "You have already rated this event"));
+
+        RatingPostDTO dto = new RatingPostDTO();
+        dto.setScore(4);
+
+        MockHttpServletRequestBuilder postRequest = post("/events/10/ratings")
+                .header("Authorization", "Bearer test-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(dto));
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     public void getMyRating_existingRating_returnsRating() throws Exception {
         given(userRepository.findByToken(anyString())).willReturn(rater);
         given(ratingService.getMyRating(Mockito.any(User.class), Mockito.eq(10L)))

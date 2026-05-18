@@ -134,6 +134,16 @@ public class RatingServiceTest {
     }
 
     @Test
+    public void createRating_duplicateRating_throwsConflict() {
+        Long eventId = 10L;
+        Mockito.when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        Mockito.when(ratingRepository.existsByRaterAndEvent(participant, event)).thenReturn(true);
+
+        assertThrows(ResponseStatusException.class,
+                () -> ratingService.createRating(eventId, participant, 4));
+    }
+
+    @Test
     public void getMyRating_existingRating_returned() {
         Long eventId = 10L;
         Rating rating = new Rating();
