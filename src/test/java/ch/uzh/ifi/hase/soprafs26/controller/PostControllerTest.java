@@ -122,6 +122,74 @@ public class PostControllerTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    public void createPost_eventNotFound_returns404() throws Exception {
+        // given
+        given(postService.createPost(any(PostPostDTO.class)))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+        PostPostDTO dto = new PostPostDTO();
+        dto.setContent("some content");
+
+        MockHttpServletRequestBuilder request = post("/events/99/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(dto))
+                .header("Authorization", "Bearer valid-token");
+
+        // when + then
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void createPost_userNotParticipant_returns403() throws Exception {
+        // given
+        given(postService.createPost(any(PostPostDTO.class)))
+                .willThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not a participant of this event"));
+
+        PostPostDTO dto = new PostPostDTO();
+        dto.setContent("some content");
+
+        MockHttpServletRequestBuilder request = post("/events/1/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(dto))
+                .header("Authorization", "Bearer valid-token");
+
+        // when + then
+        mockMvc.perform(request)
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void getPosts_invalidToken_returns401() throws Exception {
+        // given
+        given(postService.getPostsByEvent(eq(1L), eq("bad-token")))
+                .willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"));
+
+        MockHttpServletRequestBuilder request = get("/events/1/posts")
+                .header("Authorization", "Bearer bad-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // when + then
+        mockMvc.perform(request)
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getPosts_eventNotFound_returns404() throws Exception {
+        // given
+        given(postService.getPostsByEvent(eq(99L), eq("valid-token")))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+
+        MockHttpServletRequestBuilder request = get("/events/99/posts")
+                .header("Authorization", "Bearer valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // when + then
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
+
     /**
 	 * Helper Method to convert userPostDTO into a JSON string such that the input
 	 * can be processed
