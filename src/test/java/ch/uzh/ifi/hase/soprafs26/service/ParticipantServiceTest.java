@@ -99,5 +99,51 @@ public class ParticipantServiceTest {
 
         verify(eventRepository).save(event);
     }
-    
+
+    @Test
+    void joinEventByInviteCode_validInput_success() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("ABC123")).thenReturn(event);
+        when(eventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Event result = service.joinEventByInviteCode("ABC123", 1L);
+
+        assertNotNull(result);
+        assertTrue(result.getParticipants().contains(user));
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    void joinEventByInviteCode_eventNotFound_throwsNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("INVALID")).thenReturn(null);
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("INVALID", 1L));
+        assertEquals(404, ex.getStatusCode().value());
+    }
+
+    @Test
+    void joinEventByInviteCode_alreadyJoined_throwsConflict() {
+        event.getParticipants().add(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("ABC123")).thenReturn(event);
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("ABC123", 1L));
+        assertEquals(409, ex.getStatusCode().value());
+    }
+
+    @Test
+    void joinEventByInviteCode_userNotFound_throwsNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("ABC123", 99L));
+        assertEquals(404, ex.getStatusCode().value());
+    }
+
 }

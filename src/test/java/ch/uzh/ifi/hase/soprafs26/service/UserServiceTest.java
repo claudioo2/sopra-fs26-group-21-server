@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
@@ -167,6 +168,112 @@ public class UserServiceTest {
 		assertNotNull(result);
 		assertEquals(1, result.size());
 		assertTrue(result.equals(Set.of(followedUser)));
+	}
+
+	@Test
+	public void getUsers_returnsAllUsers() {
+		User user1 = new User();
+		user1.setId(1L);
+		User user2 = new User();
+		user2.setId(2L);
+		Mockito.when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+
+		List<User> result = userService.getUsers();
+
+		assertNotNull(result);
+		assertEquals(2, result.size());
+	}
+
+	@Test
+	public void getUser_found_returnsUser() {
+		User user = new User();
+		user.setId(1L);
+		user.setUsername("testUsername");
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+		User result = userService.getUser(1L);
+
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+	}
+
+	@Test
+	public void getUser_notFound_throwsNotFound() {
+		Mockito.when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+		assertThrows(ResponseStatusException.class, () -> userService.getUser(99L));
+	}
+
+	@Test
+	public void unfollowUser_validInput_success() {
+		User follower = new User();
+		follower.setId(1L);
+		follower.setUsername("follower");
+
+		User target = new User();
+		target.setId(2L);
+		target.setUsername("target");
+
+		follower.setFollowing(new HashSet<>(Set.of(target)));
+
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(follower));
+		Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(target));
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(follower);
+
+		User result = userService.unfollowUser(1L, 2L);
+
+		assertNotNull(result);
+		assertFalse(follower.getFollowing().stream().anyMatch(u -> u.getId().equals(2L)));
+		Mockito.verify(userRepository, Mockito.times(1)).save(follower);
+	}
+
+	@Test
+	public void unfollowUser_selfUnfollow_throwsBadRequest() {
+		ResponseStatusException ex = assertThrows(
+				ResponseStatusException.class,
+				() -> userService.unfollowUser(1L, 1L));
+		assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, ex.getStatusCode());
+	}
+
+	@Test
+	public void unfollowUser_notFollowing_throwsConflict() {
+		User follower = new User();
+		follower.setId(1L);
+		follower.setFollowing(new HashSet<>());
+
+		User target = new User();
+		target.setId(2L);
+
+		Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(follower));
+		Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(target));
+
+		ResponseStatusException ex = assertThrows(
+				ResponseStatusException.class,
+				() -> userService.unfollowUser(1L, 2L));
+		assertEquals(org.springframework.http.HttpStatus.CONFLICT, ex.getStatusCode());
+	}
+
+	@Test
+	public void getFollowers_returnsFollowers() {
+		User user = new User();
+		user.setId(2L);
+
+		User follower = new User();
+		follower.setId(1L);
+		follower.setFollowing(new HashSet<>(Set.of(user)));
+
+		User nonFollower = new User();
+		nonFollower.setId(3L);
+		nonFollower.setFollowing(new HashSet<>());
+
+		Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+		Mockito.when(userRepository.findAll()).thenReturn(List.of(follower, nonFollower));
+
+		List<User> result = userService.getFollowers(2L);
+
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertEquals(1L, result.get(0).getId());
 	}
 
 }
