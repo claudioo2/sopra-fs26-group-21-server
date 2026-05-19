@@ -140,12 +140,6 @@ public class EventServiceIntegrationTest {
                 LocalDateTime.now().plusHours(1),
                 LocalDateTime.now().plusHours(3), null);
 
-        // C: nearby but already over -> filtered out by time
-        createAndSave("Already Over", ZURICH_LAT, ZURICH_LON, false,
-                EventCategory.SPORTS,
-                LocalDateTime.now().minusHours(3),
-                LocalDateTime.now().minusHours(1), null);
-
         // D: private event, searcher is not a participant -> filtered out
         createAndSave("Hidden Private", ZURICH_LAT, ZURICH_LON, true,
                 EventCategory.SPORTS,

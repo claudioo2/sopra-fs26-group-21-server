@@ -53,8 +53,8 @@ public class EventServiceTest {
 
         newEvent = new Event();
         newEvent.setTitle("Test Event");
-        newEvent.setStartTime(LocalDateTime.of(2026, 4, 13, 10, 0));
-        newEvent.setEndTime(LocalDateTime.of(2026, 4, 25, 10, 0));
+        newEvent.setStartTime(LocalDateTime.now().plusDays(7));
+        newEvent.setEndTime(LocalDateTime.now().plusDays(14));
 
         event = new Event();
         event.setId(10L);
@@ -80,8 +80,8 @@ public class EventServiceTest {
 
     @Test
     void createEvent_invalidTimeTest() {
-        newEvent.setStartTime(LocalDateTime.of(2026, 4, 25, 10, 0));
-        newEvent.setEndTime(LocalDateTime.of(2026, 4, 13, 10, 0));
+        newEvent.setStartTime(LocalDateTime.now().plusDays(14));
+        newEvent.setEndTime(LocalDateTime.now().plusDays(7));
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,

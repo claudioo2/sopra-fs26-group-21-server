@@ -90,8 +90,8 @@ public class EventControllerTest {
 	public void createEvent_whenValidInput_thenReturns201() throws Exception {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-		LocalDateTime startTime = LocalDateTime.of(2026, 1, 1, 10, 0);
-		LocalDateTime endTime = LocalDateTime.of(2026, 1, 2, 10, 0);
+		LocalDateTime startTime = LocalDateTime.now().plusDays(7).truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+		LocalDateTime endTime = LocalDateTime.now().plusDays(8).truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
 		
 		User creator = new User();
 		creator.setId(1L);
