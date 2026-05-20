@@ -39,4 +39,14 @@ public class PostController {
         }
         return result;
     }
+
+    @DeleteMapping("/events/{eventId}/posts/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long eventId, @PathVariable Long postId,
+                           @RequestHeader("Authorization") String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        postService.deletePost(eventId, postId, token);
+    }
 }

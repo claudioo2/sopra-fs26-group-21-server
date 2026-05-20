@@ -75,4 +75,20 @@ public class PostService {
         }
         return postRepository.findByEventIdOrderByTimestampAsc(eventId);
     }
+
+    public void deletePost(Long eventId, Long postId, String token) {
+        User user = getUserByToken(token);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("Post with id %d does not exist", postId)));
+        if (!post.getEvent().getId().equals(eventId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Post with id %d does not belong to event %d", postId, eventId));
+        }
+        if (!post.getAuthor().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own posts");
+        }
+        getEventIfParticipant(eventId, user);
+        postRepository.delete(post);
+    }
 }

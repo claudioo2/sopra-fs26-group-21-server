@@ -130,6 +130,7 @@ public interface DTOMapper {
     @Mapping(target = "timestamp", ignore = true)
     Message convertMessagePostDTOtoEntity(MessagePostDTO messagePostDTO);
 
+    @Mapping(source = "author.id", target = "authorId")
     @Mapping(source = "author.username", target = "authorUsername")
     @Mapping(source = "event.id", target = "eventId")
     PostGetDTO convertEntityToPostGetDTO(Post post);

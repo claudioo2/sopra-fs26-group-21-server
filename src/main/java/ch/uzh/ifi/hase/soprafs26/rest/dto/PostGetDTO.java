@@ -9,6 +9,7 @@ public class PostGetDTO {
     private String content;
     private String imageUrl;
     private String emoji;
+    private Long authorId;
     private String authorUsername;
     private Long eventId;
     private LocalDateTime timestamp;
@@ -27,6 +28,9 @@ public class PostGetDTO {
 
     public String getEmoji() { return emoji; }
     public void setEmoji(String emoji) { this.emoji = emoji; }
+
+    public Long getAuthorId() { return authorId; }
+    public void setAuthorId(Long authorId) { this.authorId = authorId; }
 
     public String getAuthorUsername() { return authorUsername; }
     public void setAuthorUsername(String authorUsername) { this.authorUsername = authorUsername; }
