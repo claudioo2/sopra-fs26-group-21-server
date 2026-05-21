@@ -16,6 +16,7 @@ import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 import ch.uzh.ifi.hase.soprafs26.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs26.entity.Event;
 import ch.uzh.ifi.hase.soprafs26.entity.User;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class ParticipantServiceTest {
@@ -144,6 +145,32 @@ public class ParticipantServiceTest {
                 ResponseStatusException.class,
                 () -> service.joinEventByInviteCode("ABC123", 99L));
         assertEquals(404, ex.getStatusCode().value());
+    }
+
+    @Test
+    void joinEventById_pastEvent_throwsForbidden() {
+        event.setEndTime(LocalDateTime.now().minusHours(1));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findById(1L)).thenReturn(event);
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.joinEventById(1L, 1L));
+        assertEquals(403, ex.getStatusCode().value());
+        verify(eventRepository, never()).save(any());
+    }
+
+    @Test
+    void joinEventByInviteCode_pastEvent_throwsForbidden() {
+        event.setEndTime(LocalDateTime.now().minusHours(1));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(eventRepository.findByInviteCode("ABC123")).thenReturn(event);
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.joinEventByInviteCode("ABC123", 1L));
+        assertEquals(403, ex.getStatusCode().value());
+        verify(eventRepository, never()).save(any());
     }
 
 }

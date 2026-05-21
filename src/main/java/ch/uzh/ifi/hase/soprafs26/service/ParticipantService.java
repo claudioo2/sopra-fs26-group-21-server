@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import ch.uzh.ifi.hase.soprafs26.repository.EventRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.transaction.Transactional;
@@ -39,6 +40,9 @@ public class ParticipantService {
         if (event.getIsPrivate()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot join a private event without an invite code");
         }
+        if (event.getEndTime() != null && event.getEndTime().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot join an event that has already ended");
+        }
         if (event.getParticipants().contains(userFromId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
         }
@@ -49,10 +53,13 @@ public class ParticipantService {
     public Event joinEventByInviteCode(String inviteCode, Long userId) {
         User userFromId = userRepository.findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        
+
         Event event = eventRepository.findByInviteCode(inviteCode);
         if (event == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found");
+        }
+        if (event.getEndTime() != null && event.getEndTime().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot join an event that has already ended");
         }
         if (event.getParticipants().contains(userFromId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already joined the event");
