@@ -85,7 +85,12 @@ public class EventService {
                 double distance = calculateDistance(latitude, longitude, event.getLatitude(), event.getLongitude());
                 return distance <= radiusKm;
             })
-            .filter(event -> includePast || event.getEndTime().isAfter(now))
+            // `includePast` is a toggle: true → past events only (endTime in the
+            // past), false → upcoming/ongoing only (endTime still in the future).
+            // It is NOT "include past in addition to future".
+            .filter(event -> includePast
+                    ? !event.getEndTime().isAfter(now)
+                    : event.getEndTime().isAfter(now))
             .filter(event -> {
                 if (!event.getIsPrivate()) return true;
                 return event.getParticipants() != null && event.getParticipants().contains(user);
