@@ -37,7 +37,8 @@ public class EventService {
 
 
     public Event createEvent(Event newEvent, User user) {
-        if (newEvent.getStartTime() != null && newEvent.getStartTime().isBefore(LocalDateTime.now())) {
+        if (newEvent.getStartTime() != null
+                && newEvent.getStartTime().isBefore(LocalDateTime.now().minusMinutes(5))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start time cannot be in the past");
         }
         if (newEvent.getEndTime() != null && newEvent.getStartTime() != null
