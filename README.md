@@ -1,10 +1,10 @@
-# SoPra FS26 – Group 21 · Backend
+# 📌Sponatneo - SoPra FS26 Group 21 · Backend
 
 ## Introduction
 
-Group 21 is building a **location-based event discovery app**: users open a map, see what's happening nearby, and join — public events with one click, private ones with an 8-character invite code shared by the organizer. Each event has its own real-time chat and a shared photo / comment / emoji board; after it ends, attendees rate the organizer.
+Spontaneo is a **location-based event discovery app** that allows users to open a map, instantly see what’s happening nearby, and join events in real time. Public events can be joined with a single click, while private events require an 8-character invite code shared by the organizer. Each event includes a real-time chat powered by STOMP/SockJS and a collaborative board where participants can share photos, comments, and emoji reactions. After an event ends, attendees can rate the organizer.
 
-The motivation is to bridge the gap between social-network "events" (which assume you already know the host) and event-listing platforms (which feel impersonal): everything is anchored to a map, surfaced by proximity, and tied to a lightweight follow graph so users can also filter to events their friends are joining.
+The platform aims to bridge the gap between traditional social-network events — which usually assume users already know the host — and impersonal event-listing platforms. By centering everything around a live map, proximity-based discovery, and a lightweight social graph, Spontaneo makes discovering and joining spontaneous local activities feel more natural and social.
 
 This repository contains the **Spring Boot 4 / Java 17 backend** deployed on **Google Cloud App Engine Standard** with a **Cloud SQL Postgres** database. The Next.js frontend lives in [`sopra-fs26-group-21-client`](https://github.com/claudioo2/sopra-fs26-group-21-client).
 
@@ -114,16 +114,122 @@ Push to `main` → GitHub Actions runs [`.github/workflows/main.yml`](./.github/
 
 App Engine is configured to **scale to zero** (`min_instances: 0`, `max_instances: 1`, `F4`). The first request after idle pays a cold start of ~3–5 s; the client mitigates this by sending a warm-up `GET /users` while the user is typing on the login page. HikariCP is capped at 5 connections per instance to stay safely under Cloud SQL `db-f1-micro`'s 25-connection limit.
 
-### Docker (optional)
+---
 
-Push to `main` also builds and pushes a Docker image to Docker Hub via GitHub Actions:
+## Illustrations
 
-```bash
-docker pull <dockerhub_username>/<dockerhub_repo_name>
-docker run -p 8080:8080 <dockerhub_username>/<dockerhub_repo_name>
+The client has four main user flows. They are entered after the initial login / register screens (which can be reached via the homepage).
+
+<div align="center" style="margin-bottom: 50;">
+    <img src="register.png" width="500"/>
+    <br>
+    Register page
+</div>
+
+<br>
+
+<div align="center">
+    <img src="login.png" width="500"/>
+    <br>
+    Login page
+</div>
+
+### 1. 🗺️ Map exploration → join an event
+
+```
+/login  →  /map
+          ├─ donut clusters group nearby events by category
+          ├─ click a cluster → zoom in or spiderfy
+          ├─ click a pin → event detail modal
+          └─ modal: "Join" button (public) or invite-code prompt (private)
 ```
 
-One-time setup (one team member): create a Docker Hub account whose username contains the group number (e.g. `sopra_group_21`), create a matching Docker Hub repository, and add the GitHub secrets `dockerhub_username`, `dockerhub_password` (a Docker Hub access token), and `dockerhub_repo_name`.
+The map opens immediately on Zurich while geolocation resolves in the background, then `flyTo`s the user's position once `navigator.geolocation` succeeds (3-second timeout). Filter toggles (category, Friends-Only, My Events, Past Events) persist in `sessionStorage` so a refresh does not reset the view.
+
+<div align="center">
+    <img src="map-view.png" width="500"/>
+    <br>
+    Map page
+</div>
+
+<br>
+
+You can select the pins to view the events. Depending on your role as creator, participant or non-participant, the event view will appear differently:
+
+<div align="center">
+    <img src="event-view.png" width="500"/>
+    <br>
+    If you are looking for an event to partcipate then you can join through the "Join Event" button
+</div>
+
+### 2. 📅 Create an event
+
+```
+/map  →  right-side "Create event" panel
+          ├─ Mapbox Geocoding search (500 ms debounce) for the address
+          ├─ green pin overlay = submitted coordinates
+          └─ POST /events  →  new pin appears for everyone on next moveend
+```
+If you want to create an event then you can click on the "Drop a pin" button which is located in the middle of 
+the navigation bar (at the bottom of the map page). This will open a creation form and a pin that can be dropped on the
+desired location.
+
+The creator is auto-added as the first participant, and the server generates a unique 8-character invite code visible only to them.
+
+<div align="center">
+    <img src="creation.png" width="500"/>
+    <br>
+    To create an event, set the position of the event and fill out the creation form
+</div>
+
+### 3. 💬 Real-time chat
+
+```
+event modal  →  "Open chat"
+                ├─ REST: GET /events/{id}/messages  (history)
+                ├─ STOMP/SockJS connect on /ws
+                ├─ subscribe /topic/chat/{eventId}
+                └─ publish /app/chat/{eventId}  (token in body)
+```
+The chat can be found on the event-view and by clicking on the "Join Chat" button.
+
+The chat survives a soft-delete: when the organizer cancels an event the row is kept for **24 hours** so participants can still coordinate. After that the cleanup job hard-deletes the event.
+
+<div align="center">
+    <img src="event-chat.png" width="500"/>
+    <br>
+    Chat with other participants in real-time
+</div>
+
+### 4. 👤 Profile, follow, rate
+
+```
+/users/[id]
+  ├─ Follow / Unfollow toggle (other users)
+  ├─ View Following / View Followers modals
+  ├─ Join by invite code
+  ├─ Upcoming events list (cancelled events get a red badge)
+  └─ Rate the organizer (visible only after the event ends)
+```
+The profile page, which can be reached by clicking on the profile icon on the navigation bar, appears different depending
+on the user (if it's you or some other user). There you can follow and unfollow other users, see their events and ratings, 
+edit your account, and join events through shared invitation codes. 
+
+Ratings are 1–5 stars, one per (user, event) — the DB enforces a `UNIQUE(rater_id, event_id)` constraint and a second submission returns `409`.
+
+<div align="center">
+    <img src="own-profile.png" width="500"/>
+    <br>
+    Profile page (own profile)
+</div>
+
+<br>
+
+<div align="center">
+    <img src="user-profile.png" width="500"/>
+    <br>
+    Profile Page (profile of a friend)
+</div>
 
 ---
 
@@ -147,10 +253,10 @@ Group 21, FS26, University of Zurich — SoPra (Software Engineering Lab):
 - **[@Pascal-Trautmann](https://github.com/Pascal-Trautmann)**
 - **[@semirIbra](https://github.com/semirIbra)**
 
-Many thanks to the SoPra teaching team and our TA for guidance throughout the semester. The project bootstrap is based on the official [`sopra-fs26-template-server`](https://github.com/HASEL-UZH/sopra-fs26-template-server) from the HASEL group at UZH.
+Many thanks to the SoPra teaching team and our TA for guidance throughout the semester. The project bootstrap is based on the official [`sopra-fs26-template-client`](https://github.com/HASEL-UZH/sopra-fs26-template-client) from the HASEL group at UZH.
 
 ---
 
 ## License
 
-Licensed under the **Apache License 2.0** — see the [`LICENSE`](./LICENSE) file for the full text.
+Licensed under the **Apache License 2.0** — see the [`LICENSE`](../sopra-fs26-group-21-server/LICENSE) file in the server repository for the full text.
